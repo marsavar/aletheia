@@ -9,52 +9,30 @@ use std::string::ToString;
 use strum_macros::Display;
 
 #[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[strum(serialize_all = "camelCase")]
 pub enum Field {
-    #[strum(serialize = "trailText")]
     TrailText,
-    #[strum(serialize = "headline")]
     Headline,
-    #[strum(serialize = "showInRelatedContent")]
     ShowInRelatedContent,
-    #[strum(serialize = "body")]
     Body,
-    #[strum(serialize = "lastModified")]
     LastModified,
-    #[strum(serialize = "hasStoryPackage")]
     HasStoryPackage,
-    #[strum(serialize = "score")]
     Score,
-    #[strum(serialize = "standfirst")]
     StandFirst,
-    #[strum(serialize = "shortUrl")]
     ShortUrl,
-    #[strum(serialize = "byline")]
     Byline,
-    #[strum(serialize = "thumbnail")]
     Thumbnail,
-    #[strum(serialize = "wordcount")]
     Wordcount,
-    #[strum(serialize = "commentable")]
     Commentable,
-    #[strum(serialize = "isPremoderated")]
     IsPremoderated,
-    #[strum(serialize = "allowUgc")]
     AllowUgc,
-    #[strum(serialize = "publication")]
     Publication,
-    #[strum(serialize = "internalPageCode")]
     InternalPageCode,
-    #[strum(serialize = "productionOffice")]
     ProductionOffice,
-    #[strum(serialize = "shouldHideAdverts")]
     ShouldHideAdverts,
-    #[strum(serialize = "liveBloggingNow")]
     LiveBloggingNow,
-    #[strum(serialize = "commentCloseDate")]
     CommentCloseDate,
-    #[strum(serialize = "starRating")]
     StarRating,
-    #[strum(serialize = "all")]
     All,
 }
 
@@ -160,7 +138,8 @@ impl GuardianContentClient {
 
     pub fn show_fields(&mut self, show_fields: Vec<Field>) -> &mut GuardianContentClient {
         let field_sequence = if show_fields.contains(&Field::All) {
-            String::from("all")
+            let all = Field::All;
+            all.to_string()
         } else {
             show_fields
                 .iter()
