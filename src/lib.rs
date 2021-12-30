@@ -1,145 +1,72 @@
-use chrono::Utc;
+//! Aletheia is a client library for the Guardian's content API.
+//!
+//! It is built on top of `reqwest` and provides a similar interface
+//! for building queries.
+//!
+//! Responses returned by the client are serialized into structs
+//! mirroring the types used by the API.
+//!
+//! # Example
+//! ```
+//! use std::error::Error;
+//! use aletheia::GuardianContentClient;
+//! use aletheia::enums::{Field, OrderBy, OrderDate};
+//!
+//! #[tokio::main]
+//! async fn main() -> Result<(), Box<dyn Error>> {
+//!     let mut client = GuardianContentClient::new("your-api-key")?;
+//!
+//!     let response = client
+//!         .search("rust")
+//!         .page_size(10)
+//!         .show_fields(vec![Field::Byline, Field::LastModified])
+//!         .order_by(OrderBy::Newest)
+//!         .order_date(OrderDate::Published)
+//!         .send()
+//!         .await?;
+//!
+//!     let results = response.results;
+//!
+//!     Ok(())
+//! }
+//! ```
+
+pub mod enums;
+pub mod structs;
+
+use std::collections::HashMap;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
-use serde_with::skip_serializing_none;
-use std::collections::HashMap;
 use std::error::Error;
 use std::string::ToString;
-use strum_macros::Display;
+use crate::enums::*;
+use crate::structs::*;
 
-#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
-#[strum(serialize_all = "camelCase")]
-pub enum OrderBy {
-    Newest,
-    Oldest,
-    Relevance,
-}
-
-#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
-#[strum(serialize_all = "kebab-case")]
-pub enum OrderDate {
-    Published,
-    NewspaperEdition,
-    LastModified,
-}
-
-#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
-#[strum(serialize_all = "camelCase")]
-pub enum Field {
-    TrailText,
-    Headline,
-    ShowInRelatedContent,
-    Body,
-    LastModified,
-    HasStoryPackage,
-    Score,
-    StandFirst,
-    ShortUrl,
-    Byline,
-    Thumbnail,
-    Wordcount,
-    Commentable,
-    IsPremoderated,
-    AllowUgc,
-    Publication,
-    InternalPageCode,
-    ProductionOffice,
-    ShouldHideAdverts,
-    LiveBloggingNow,
-    CommentCloseDate,
-    StarRating,
-    All,
-}
-
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Response {
-    pub message: Option<String>,
-    pub response: Option<SearchResponse>,
-}
-
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SearchResponse {
-    pub status: String,
-    pub user_tier: Option<String>,
-    pub total: Option<u32>,
-    pub start_index: Option<u32>,
-    pub page_size: Option<u32>,
-    pub current_page: Option<u32>,
-    pub pages: Option<u32>,
-    pub order_by: Option<String>,
-    pub results: Option<Vec<SearchResult>>,
-    pub message: Option<String>,
-}
-
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Fields {
-    pub byline: Option<String>,
-    pub short_url: Option<String>,
-    pub trail_text: Option<String>,
-    pub headline: Option<String>,
-    pub body: Option<String>,
-    pub last_modified: Option<chrono::DateTime<Utc>>,
-    pub has_story_package: Option<String>,
-    pub score: Option<String>,
-    pub standfirst: Option<String>,
-    pub show_in_related_content: Option<String>,
-    pub thumbnail: Option<String>,
-    pub wordcount: Option<String>,
-    pub commentable: Option<String>,
-    pub is_premoderated: Option<String>,
-    pub allow_ugc: Option<String>,
-    pub publication: Option<String>,
-    pub internal_page_code: Option<String>,
-    pub production_office: Option<String>,
-    pub should_hide_adverts: Option<String>,
-    pub live_blogging_now: Option<String>,
-    pub comment_close_date: Option<chrono::DateTime<Utc>>,
-    pub star_rating: Option<String>,
-}
-
-#[skip_serializing_none]
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SearchResult {
-    pub id: String,
-    pub r#type: String,
-    pub section_id: String,
-    pub section_name: String,
-    pub web_publication_date: chrono::DateTime<Utc>,
-    pub web_title: String,
-    pub web_url: String,
-    pub api_url: String,
-    pub is_hosted: bool,
-    pub pillar_id: Option<String>,
-    pub pillar_name: Option<String>,
-    pub fields: Option<Fields>,
-}
-
+/// The main asynchronous client used to build requests to send to the Guardian's
+/// content API. This client maintains an internal asynchronous client implemented
+/// by `reqwest::Client`, but it is not publicly accessible.
 #[derive(Debug)]
 pub struct GuardianContentClient {
-    pub http_client: reqwest::Client,
-    pub base_url: String,
+    http_client: reqwest::Client,
     api_key: String,
+    pub base_url: String,
     pub request: HashMap<String, String>,
 }
 
-fn get_headers(client: &GuardianContentClient) -> HeaderMap {
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        "api-key",
-        HeaderValue::from_str(&client.api_key[..]).unwrap(),
-    );
-    headers
-}
-
 impl GuardianContentClient {
+    /// Constructor for the client.
+    /// The constructor takes an API key which is then stored internally
+    /// in the struct. The client then uses the builder pattern
+    /// to add query parameters to the request. These methods
+    /// modify the client's internal structure, therefore
+    /// the client should be initialised with the `mut` keyword.
+    ///
+    /// # Example
+    /// ```
+    /// let mut client = aletheia::GuardianContentClient("api-key-here");
+    /// ```
+    /// API keys for the Guardian's content API can be requested at
+    /// <https://open-platform.theguardian.com/access/>
     pub fn new(api_key: &str) -> Result<GuardianContentClient, Box<dyn Error>> {
         let client = Self {
             http_client: Client::new(),
@@ -148,6 +75,29 @@ impl GuardianContentClient {
             request: HashMap::new(),
         };
         Ok(client)
+    }
+
+    fn add_api_key_to_headers(&self) -> HeaderMap {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            "api-key",
+            HeaderValue::from_str(&self.api_key[..]).unwrap(),
+        );
+        headers
+    }
+
+    fn generate_field_sequence(&self, fields: Vec<enums::Field>) -> String {
+        let field_sequence = if fields.contains(&Field::All) {
+            let all = Field::All;
+            all.to_string()
+        } else {
+            fields
+                .iter()
+                .map(|enum_field| enum_field.to_string())
+                .collect::<Vec<String>>()
+                .join(",")
+        };
+        field_sequence
     }
 
     pub fn search(&mut self, q: &str) -> &mut GuardianContentClient {
@@ -164,19 +114,20 @@ impl GuardianContentClient {
     /// Attaches a page size to the request.
     ///
     /// The page value must be between 0 and 200 for a successful response.
+    /// This constraint is enforced upstream by the content API.
     pub fn page_size(&mut self, page: u8) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("page-size"), String::from(page.to_string()));
         self
     }
 
-    pub fn order_by(&mut self, order_by: OrderBy) -> &mut GuardianContentClient {
+    pub fn order_by(&mut self, order_by: enums::OrderBy) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("order-by"), String::from(order_by.to_string()));
         self
     }
 
-    pub fn order_date(&mut self, order_date: OrderDate) -> &mut GuardianContentClient {
+    pub fn order_date(&mut self, order_date: enums::OrderDate) -> &mut GuardianContentClient {
         self.request.insert(
             String::from("order-date"),
             String::from(order_date.to_string()),
@@ -184,29 +135,28 @@ impl GuardianContentClient {
         self
     }
 
-    pub fn show_fields(&mut self, show_fields: Vec<Field>) -> &mut GuardianContentClient {
-        let field_sequence = if show_fields.contains(&Field::All) {
-            let all = Field::All;
-            all.to_string()
-        } else {
-            show_fields
-                .iter()
-                .map(|enum_field| enum_field.to_string())
-                .collect::<Vec<String>>()
-                .join(",")
-        };
-
+    pub fn show_fields(&mut self, show_fields: Vec<enums::Field>) -> &mut GuardianContentClient {
+        let field_sequence = self.generate_field_sequence(show_fields);
         self.request
             .insert(String::from("show-fields"), String::from(field_sequence));
         self
     }
 
+    pub fn query_fields(&mut self, query_fields: Vec<enums::Field>) -> &mut GuardianContentClient {
+        let field_sequence = self.generate_field_sequence(query_fields);
+        self.request
+            .insert(String::from("query-fields"), String::from(field_sequence));
+        self
+    }
+    /// Terminal operation hitting the /search endpoint.
+    /// Once this function is called, all the query parameters constructed
+    /// via the building methods are dropped.
     pub async fn send(&mut self) -> Result<SearchResponse, Box<dyn Error>> {
         let queries = Vec::from_iter(self.request.iter());
         let search = self
             .http_client
             .get(format!("{}/search", self.base_url))
-            .headers(get_headers(&self))
+            .headers(self.add_api_key_to_headers())
             .query(&queries)
             .send()
             .await?
