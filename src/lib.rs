@@ -2,13 +2,13 @@ use chrono::Utc;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use std::collections::HashMap;
 use std::error::Error;
 use std::string::ToString;
 use strum_macros::Display;
-use serde_with::skip_serializing_none;
 
-#[derive(Display, Debug, Serialize, Deserialize)]
+#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub enum Field {
     #[strum(serialize = "trailText")]
     TrailText,
@@ -30,6 +30,32 @@ pub enum Field {
     ShortUrl,
     #[strum(serialize = "byline")]
     Byline,
+    #[strum(serialize = "thumbnail")]
+    Thumbnail,
+    #[strum(serialize = "wordcount")]
+    Wordcount,
+    #[strum(serialize = "commentable")]
+    Commentable,
+    #[strum(serialize = "isPremoderated")]
+    IsPremoderated,
+    #[strum(serialize = "allowUgc")]
+    AllowUgc,
+    #[strum(serialize = "publication")]
+    Publication,
+    #[strum(serialize = "internalPageCode")]
+    InternalPageCode,
+    #[strum(serialize = "productionOffice")]
+    ProductionOffice,
+    #[strum(serialize = "shouldHideAdverts")]
+    ShouldHideAdverts,
+    #[strum(serialize = "liveBloggingNow")]
+    LiveBloggingNow,
+    #[strum(serialize = "commentCloseDate")]
+    CommentCloseDate,
+    #[strum(serialize = "starRating")]
+    StarRating,
+    #[strum(serialize = "all")]
+    All,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -63,12 +89,25 @@ pub struct Fields {
     pub headline: Option<String>,
     pub body: Option<String>,
     pub last_modified: Option<chrono::DateTime<Utc>>,
-    pub has_story_package: Option<bool>,
-    pub score: Option<f32>,
+    pub has_story_package: Option<String>,
+    pub score: Option<String>,
     pub standfirst: Option<String>,
     pub show_in_related_content: Option<String>,
+    pub thumbnail: Option<String>,
+    pub wordcount: Option<String>,
+    pub commentable: Option<String>,
+    pub is_premoderated: Option<String>,
+    pub allow_ugc: Option<String>,
+    pub publication: Option<String>,
+    pub internal_page_code: Option<String>,
+    pub production_office: Option<String>,
+    pub should_hide_adverts: Option<String>,
+    pub live_blogging_now: Option<String>,
+    pub comment_close_date: Option<chrono::DateTime<Utc>>,
+    pub star_rating: Option<String>,
 }
 
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SearchResult {
@@ -120,26 +159,18 @@ impl GuardianContentClient {
     }
 
     pub fn show_fields(&mut self, show_fields: Vec<Field>) -> &mut GuardianContentClient {
-        println!(
-            "{}",
-            String::from(
-                show_fields
-                    .iter()
-                    .map(|enum_field| enum_field.to_string())
-                    .collect::<Vec<String>>()
-                    .join(","),
-            )
-        );
-        self.request.insert(
-            String::from("show-fields"),
-            String::from(
-                show_fields
-                    .iter()
-                    .map(|enum_field| enum_field.to_string())
-                    .collect::<Vec<String>>()
-                    .join(","),
-            ),
-        );
+        let field_sequence = if show_fields.contains(&Field::All) {
+            String::from("all")
+        } else {
+            show_fields
+                .iter()
+                .map(|enum_field| enum_field.to_string())
+                .collect::<Vec<String>>()
+                .join(",")
+        };
+
+        self.request
+            .insert(String::from("show-fields"), String::from(field_sequence));
         self
     }
 
@@ -152,7 +183,7 @@ impl GuardianContentClient {
             .query(&queries)
             .send()
             .await?
-            .json::<Response>()
+            .json()
             .await?;
 
         match search {
@@ -167,10 +198,10 @@ impl GuardianContentClient {
             Response {
                 message: _,
                 response: Some(x),
-            } =>  {
+            } => {
                 self.request.clear();
                 Ok(x)
-            },
+            }
         }
     }
 }
