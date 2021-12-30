@@ -2,6 +2,10 @@
 name = "aletheia"
 version = "0.1.0"
 edition = "2021"
+description = "A client library for the Guardian's content API"
+license = "MIT"
+documentation = "https://docs.rs/aletheia"
+repository = "https://github.com/MarSavar/aletheia/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
