@@ -6,12 +6,13 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::string::ToString;
 use strum_macros::Display;
+use serde_with::skip_serializing_none;
 
-#[derive(Display, Debug)]
+#[derive(Display, Debug, Serialize, Deserialize)]
 pub enum Field {
     #[strum(serialize = "trailText")]
     TrailText,
-    #[strum(serialize = "headLine")]
+    #[strum(serialize = "headline")]
     Headline,
     #[strum(serialize = "showInRelatedContent")]
     ShowInRelatedContent,
@@ -23,7 +24,7 @@ pub enum Field {
     HasStoryPackage,
     #[strum(serialize = "score")]
     Score,
-    #[strum(serialize = "standFirst")]
+    #[strum(serialize = "standfirst")]
     StandFirst,
     #[strum(serialize = "shortUrl")]
     ShortUrl,
@@ -52,6 +53,7 @@ pub struct SearchResponse {
     pub results: Vec<SearchResult>,
 }
 
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Fields {
@@ -59,7 +61,12 @@ pub struct Fields {
     pub short_url: Option<String>,
     pub trail_text: Option<String>,
     pub headline: Option<String>,
-    pub body: String,
+    pub body: Option<String>,
+    pub last_modified: Option<chrono::DateTime<Utc>>,
+    pub has_story_package: Option<bool>,
+    pub score: Option<f32>,
+    pub standfirst: Option<String>,
+    pub show_in_related_content: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -81,7 +88,7 @@ pub struct SearchResult {
 
 #[derive(Debug)]
 pub struct GuardianContentClient {
-    http_client: reqwest::Client,
+    pub http_client: reqwest::Client,
     pub base_url: String,
     api_key: String,
     pub request: HashMap<String, String>,
@@ -113,12 +120,22 @@ impl GuardianContentClient {
     }
 
     pub fn show_fields(&mut self, show_fields: Vec<Field>) -> &mut GuardianContentClient {
+        println!(
+            "{}",
+            String::from(
+                show_fields
+                    .iter()
+                    .map(|enum_field| enum_field.to_string())
+                    .collect::<Vec<String>>()
+                    .join(","),
+            )
+        );
         self.request.insert(
             String::from("show-fields"),
             String::from(
                 show_fields
                     .iter()
-                    .map(|x| x.to_string())
+                    .map(|enum_field| enum_field.to_string())
                     .collect::<Vec<String>>()
                     .join(","),
             ),
@@ -150,7 +167,10 @@ impl GuardianContentClient {
             Response {
                 message: _,
                 response: Some(x),
-            } => Ok(x),
+            } =>  {
+                self.request.clear();
+                Ok(x)
+            },
         }
     }
 }
