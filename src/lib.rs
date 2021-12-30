@@ -10,6 +10,22 @@ use strum_macros::Display;
 
 #[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "camelCase")]
+pub enum OrderBy {
+    Newest,
+    Oldest,
+    Relevance,
+}
+
+#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[strum(serialize_all = "kebab-case")]
+pub enum OrderDate {
+    Published,
+    NewspaperEdition,
+    LastModified,
+}
+
+#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[strum(serialize_all = "camelCase")]
 pub enum Field {
     TrailText,
     Headline,
@@ -151,6 +167,20 @@ impl GuardianContentClient {
     pub fn page_size(&mut self, page: u8) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("page-size"), String::from(page.to_string()));
+        self
+    }
+
+    pub fn order_by(&mut self, order_by: OrderBy) -> &mut GuardianContentClient {
+        self.request
+            .insert(String::from("order-by"), String::from(order_by.to_string()));
+        self
+    }
+
+    pub fn order_date(&mut self, order_date: OrderDate) -> &mut GuardianContentClient {
+        self.request.insert(
+            String::from("order-date"),
+            String::from(order_date.to_string()),
+        );
         self
     }
 
