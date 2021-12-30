@@ -36,6 +36,7 @@ pub enum Field {
     All,
 }
 
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Response {
@@ -43,18 +44,20 @@ pub struct Response {
     pub response: Option<SearchResponse>,
 }
 
+#[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SearchResponse {
     pub status: String,
-    pub user_tier: String,
-    pub total: u32,
-    pub start_index: u32,
-    pub page_size: u32,
-    pub current_page: u32,
-    pub pages: u32,
-    pub order_by: String,
-    pub results: Vec<SearchResult>,
+    pub user_tier: Option<String>,
+    pub total: Option<u32>,
+    pub start_index: Option<u32>,
+    pub page_size: Option<u32>,
+    pub current_page: Option<u32>,
+    pub pages: Option<u32>,
+    pub order_by: Option<String>,
+    pub results: Option<Vec<SearchResult>>,
+    pub message: Option<String>,
 }
 
 #[skip_serializing_none]
@@ -136,6 +139,21 @@ impl GuardianContentClient {
         self
     }
 
+    pub fn page(&mut self, page: u32) -> &mut GuardianContentClient {
+        self.request
+            .insert(String::from("page"), String::from(page.to_string()));
+        self
+    }
+
+    /// Attaches a page size to the request.
+    ///
+    /// The page value must be between 0 and 200 for a successful response.
+    pub fn page_size(&mut self, page: u8) -> &mut GuardianContentClient {
+        self.request
+            .insert(String::from("page-size"), String::from(page.to_string()));
+        self
+    }
+
     pub fn show_fields(&mut self, show_fields: Vec<Field>) -> &mut GuardianContentClient {
         let field_sequence = if show_fields.contains(&Field::All) {
             let all = Field::All;
@@ -169,11 +187,11 @@ impl GuardianContentClient {
             Response {
                 message: None,
                 response: None,
-            } => panic!("No response from the server."),
+            } => panic!("Placeholder"),
             Response {
                 message: Some(x),
                 response: _,
-            } => panic!("{:?}", x),
+            } => panic!("{}", x),
             Response {
                 message: _,
                 response: Some(x),
