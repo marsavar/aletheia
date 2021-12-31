@@ -4,7 +4,6 @@ use serde_with::skip_serializing_none;
 
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct Response {
     pub message: Option<String>,
     pub response: Option<SearchResponse>,
@@ -101,12 +100,34 @@ pub struct SearchResult {
     pub pillar_name: Option<String>,
     pub fields: Option<Fields>,
     pub tags: Option<Vec<Tags>>,
+    pub section: Option<Section>,
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Reference {
+    pub id: String,
+    pub r#type: String,
 }
 
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Reference {
+pub struct Section {
     pub id: String,
-    pub r#type: String,
+    pub web_title: String,
+    pub web_url: String,
+    pub api_url: String,
+    pub editions: Vec<Edition>,
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Edition {
+    pub id: String,
+    pub web_title: String,
+    pub web_url: String,
+    pub api_url: String,
+    pub code: String,
 }

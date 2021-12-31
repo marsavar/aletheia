@@ -197,6 +197,12 @@ impl GuardianContentClient {
         self
     }
 
+    pub fn show_section(&mut self, show_section: bool) -> &mut GuardianContentClient {
+        self.request
+            .insert(String::from("show-section"), String::from(show_section.to_string()));
+        self
+    }
+
     /// Terminal operation hitting the /search endpoint.
     /// Once this function is called, all the query parameters constructed
     /// via the building methods are dropped.
