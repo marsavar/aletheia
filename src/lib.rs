@@ -85,20 +85,6 @@ impl GuardianContentClient {
         headers
     }
 
-    fn generate_field_sequence(&self, fields: Vec<enums::Field>) -> String {
-        let field_sequence = if fields.contains(&Field::All) {
-            let all = Field::All;
-            all.to_string()
-        } else {
-            fields
-                .iter()
-                .map(|enum_field| enum_field.to_string())
-                .collect::<Vec<String>>()
-                .join(",")
-        };
-        field_sequence
-    }
-
     pub fn search(&mut self, q: &str) -> &mut GuardianContentClient {
         self.request.insert(String::from("q"), String::from(q));
         self
@@ -135,14 +121,21 @@ impl GuardianContentClient {
     }
 
     pub fn show_fields(&mut self, show_fields: Vec<enums::Field>) -> &mut GuardianContentClient {
-        let field_sequence = self.generate_field_sequence(show_fields);
+        let field_sequence = crate::helpers::generate_sequence(show_fields);
         self.request
             .insert(String::from("show-fields"), String::from(field_sequence));
         self
     }
 
+    pub fn show_tags(&mut self, show_tags: Vec<enums::Tag>) -> &mut GuardianContentClient {
+        let tag_sequence = crate::helpers::generate_sequence(show_tags);
+        self.request
+            .insert(String::from("show-tags"), String::from(tag_sequence));
+        self
+    }
+
     pub fn query_fields(&mut self, query_fields: Vec<enums::Field>) -> &mut GuardianContentClient {
-        let field_sequence = self.generate_field_sequence(query_fields);
+        let field_sequence = crate::helpers::generate_sequence(query_fields);
         self.request
             .insert(String::from("query-fields"), String::from(field_sequence));
         self
@@ -231,10 +224,10 @@ impl GuardianContentClient {
 }
 
 mod helpers {
-    use crate::SearchResponse;
+    use crate::{enums, Field, SearchResponse, Tag};
     use chrono::{FixedOffset, TimeZone};
 
-    pub fn std_err(message: &Option<String>, response: &Option<SearchResponse>) {
+    pub(crate) fn std_err(message: &Option<String>, response: &Option<SearchResponse>) {
         if message.is_some() {
             eprintln!("Error: {}", message.as_ref().unwrap())
         }
@@ -247,7 +240,16 @@ mod helpers {
         }
     }
 
-    pub fn datetime(
+    pub(crate) fn generate_sequence<T: std::fmt::Display>(items: Vec<T>) -> String {
+        let items_to_strings = items.iter().map(|item| item.to_string());
+        return if let Some(all) = items_to_strings.clone().find(|x| x == "all") {
+            all
+        } else {
+            items_to_strings.collect::<Vec<String>>().join(",")
+        };
+    }
+
+    pub(crate) fn datetime(
         year: i32,
         month: u32,
         day: u32,
@@ -268,18 +270,18 @@ mod helpers {
             .to_rfc3339()
     }
 
-    pub fn mock_response() -> SearchResponse {
+    pub(crate) fn mock_response() -> SearchResponse {
         SearchResponse {
-            status: "mock response".to_string(),
-            user_tier: None,
-            total: None,
-            start_index: None,
-            page_size: None,
-            current_page: None,
-            pages: None,
-            order_by: None,
+            status: "".to_string(),
+            user_tier: "".to_string(),
+            total: 0,
+            start_index: 0,
+            page_size: 0,
+            current_page: 0,
+            pages: 0,
+            order_by: "".to_string(),
             results: None,
-            message: None,
+            message: None
         }
     }
 }

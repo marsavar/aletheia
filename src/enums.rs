@@ -1,5 +1,5 @@
-use strum_macros::Display;
 use serde::{Deserialize, Serialize};
+use strum_macros::Display;
 
 #[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "camelCase")]
@@ -23,7 +23,7 @@ pub enum UseDate {
     Published,
     FirstPublication,
     NewspaperEdition,
-    LastModified
+    LastModified,
 }
 
 #[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -51,5 +51,20 @@ pub enum Field {
     LiveBloggingNow,
     CommentCloseDate,
     StarRating,
+    All,
+}
+
+#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[strum(serialize_all = "camelCase")]
+pub enum Tag {
+    Blog,
+    Contributor,
+    Keyword,
+    NewspaperBook,
+    NewspaperBookSection,
+    Publication,
+    Series,
+    Tone,
+    Type,
     All,
 }

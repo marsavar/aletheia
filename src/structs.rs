@@ -15,13 +15,13 @@ pub struct Response {
 #[serde(rename_all = "camelCase")]
 pub struct SearchResponse {
     pub status: String,
-    pub user_tier: Option<String>,
-    pub total: Option<u32>,
-    pub start_index: Option<u32>,
-    pub page_size: Option<u32>,
-    pub current_page: Option<u32>,
-    pub pages: Option<u32>,
-    pub order_by: Option<String>,
+    pub user_tier: String,
+    pub total: u32,
+    pub start_index: u32,
+    pub page_size: u32,
+    pub current_page: u32,
+    pub pages: u32,
+    pub order_by: String,
     pub results: Option<Vec<SearchResult>>,
     pub message: Option<String>,
 }
@@ -57,6 +57,36 @@ pub struct Fields {
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct Tags {
+    pub id: String,
+    pub r#type: String,
+    pub web_title: String,
+    pub web_url: String,
+    pub api_url: String,
+    pub references: Vec<Reference>,
+    pub bio: Option<String>,
+    pub byline_image_url: Option<String>,
+    pub byline_large_image_url: Option<String>,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub email_address: Option<String>,
+    pub twitter_handle: Option<String>,
+    pub section_id: Option<String>,
+    pub section_name: Option<String>,
+    pub description: Option<String>,
+    pub paid_content_type: Option<String>,
+    pub paid_content_type_campaign_colour: Option<String>,
+    pub rcs_id: Option<String>,
+    pub r2_contributor_id: Option<String>,
+    pub tag_categories: Option<Vec<String>>,
+    pub entity_ids: Option<Vec<String>>,
+    pub campaign_information_type: Option<String>,
+    pub internal_name: Option<String>,
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SearchResult {
     pub id: String,
     pub r#type: String,
@@ -70,4 +100,13 @@ pub struct SearchResult {
     pub pillar_id: Option<String>,
     pub pillar_name: Option<String>,
     pub fields: Option<Fields>,
+    pub tags: Option<Vec<Tags>>,
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Reference {
+    pub id: String,
+    pub r#type: String,
 }
