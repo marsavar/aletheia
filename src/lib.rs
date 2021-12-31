@@ -34,13 +34,13 @@
 pub mod enums;
 pub mod structs;
 
-use std::collections::HashMap;
-use reqwest::header::{HeaderMap, HeaderValue};
-use reqwest::Client;
-use std::error::Error;
-use std::string::ToString;
 use crate::enums::*;
 use crate::structs::*;
+use reqwest::header::{HeaderMap, HeaderValue};
+use reqwest::Client;
+use std::collections::HashMap;
+use std::error::Error;
+use std::string::ToString;
 
 /// The main asynchronous client used to build requests to send to the Guardian's
 /// content API. This client maintains an internal asynchronous client implemented
@@ -80,10 +80,7 @@ impl GuardianContentClient {
     fn add_api_key_to_headers(&self) -> HeaderMap {
         let mut headers = HeaderMap::new();
         if self.api_key.len() > 0 {
-            headers.insert(
-                "api-key",
-                HeaderValue::from_str(&self.api_key[..]).unwrap(),
-            );
+            headers.insert("api-key", HeaderValue::from_str(&self.api_key[..]).unwrap());
         }
         headers
     }
@@ -150,6 +147,57 @@ impl GuardianContentClient {
             .insert(String::from("query-fields"), String::from(field_sequence));
         self
     }
+
+    pub fn date_from(&mut self, year: i32, month: u32, day: u32) -> &mut GuardianContentClient {
+        self.request.insert(
+            String::from("from-date"),
+            format!("{}-{}-{}", year, month, day),
+        );
+        self
+    }
+
+    pub fn datetime_from(
+        &mut self,
+        year: i32,
+        month: u32,
+        day: u32,
+        hour: u32,
+        min: u32,
+        sec: u32,
+        timezone: i32,
+    ) -> &mut GuardianContentClient {
+        let formatted_datetime =
+            crate::helpers::datetime(year, month, day, hour, min, sec, timezone);
+        self.request
+            .insert(String::from("from-date"), formatted_datetime);
+        self
+    }
+
+    pub fn date_to(&mut self, year: i32, month: u32, day: u32) -> &mut GuardianContentClient {
+        self.request.insert(
+            String::from("to-date"),
+            format!("{}-{}-{}", year, month, day),
+        );
+        self
+    }
+
+    pub fn datetime_to(
+        &mut self,
+        year: i32,
+        month: u32,
+        day: u32,
+        hour: u32,
+        min: u32,
+        sec: u32,
+        timezone: i32,
+    ) -> &mut GuardianContentClient {
+        let formatted_datetime =
+            crate::helpers::datetime(year, month, day, hour, min, sec, timezone);
+        self.request
+            .insert(String::from("to-date"), formatted_datetime);
+        self
+    }
+
     /// Terminal operation hitting the /search endpoint.
     /// Once this function is called, all the query parameters constructed
     /// via the building methods are dropped.
@@ -171,17 +219,16 @@ impl GuardianContentClient {
 
         match search.response {
             Some(r) => Ok(r),
-            None => { Ok(crate::helpers::mock_response() )}
+            None => Ok(crate::helpers::mock_response()),
         }
-
     }
 }
 
 mod helpers {
     use crate::SearchResponse;
+    use chrono::{FixedOffset, TimeZone};
 
     pub fn std_err(message: &Option<String>, response: &Option<SearchResponse>) {
-
         if message.is_some() {
             eprintln!("Error: {}", message.as_ref().unwrap())
         }
@@ -192,6 +239,27 @@ mod helpers {
                 eprintln!("Error: {}", response_content.message.as_ref().unwrap());
             }
         }
+    }
+
+    pub fn datetime(
+        year: i32,
+        month: u32,
+        day: u32,
+        hour: u32,
+        min: u32,
+        sec: u32,
+        timezone: i32,
+    ) -> String {
+        let offset: fn(i32) -> FixedOffset = if timezone >= 0 {
+            FixedOffset::east
+        } else {
+            FixedOffset::west
+        };
+
+        offset(timezone.abs() * 3600)
+            .ymd(year, month, day)
+            .and_hms(hour, min, sec)
+            .to_rfc3339()
     }
 
     pub fn mock_response() -> SearchResponse {
@@ -205,7 +273,7 @@ mod helpers {
             pages: None,
             order_by: None,
             results: None,
-            message: None
+            message: None,
         }
     }
 }
