@@ -79,10 +79,12 @@ impl GuardianContentClient {
 
     fn add_api_key_to_headers(&self) -> HeaderMap {
         let mut headers = HeaderMap::new();
-        headers.insert(
-            "api-key",
-            HeaderValue::from_str(&self.api_key[..]).unwrap(),
-        );
+        if self.api_key.len() > 0 {
+            headers.insert(
+                "api-key",
+                HeaderValue::from_str(&self.api_key[..]).unwrap(),
+            );
+        }
         headers
     }
 
@@ -160,25 +162,50 @@ impl GuardianContentClient {
             .query(&queries)
             .send()
             .await?
-            .json()
+            .json::<Response>()
             .await?;
 
-        match search {
-            Response {
-                message: None,
-                response: None,
-            } => panic!("Placeholder"),
-            Response {
-                message: Some(x),
-                response: _,
-            } => panic!("{}", x),
-            Response {
-                message: _,
-                response: Some(x),
-            } => {
-                self.request.clear();
-                Ok(x)
+        crate::helpers::std_err(&search.message, &search.response);
+
+        self.request.clear();
+
+        match search.response {
+            Some(r) => Ok(r),
+            None => { Ok(crate::helpers::mock_response() )}
+        }
+
+    }
+}
+
+mod helpers {
+    use crate::SearchResponse;
+
+    pub fn std_err(message: &Option<String>, response: &Option<SearchResponse>) {
+
+        if message.is_some() {
+            eprintln!("Error: {}", message.as_ref().unwrap())
+        }
+
+        if response.is_some() {
+            let response_content = response.as_ref().unwrap();
+            if response_content.status == "error" && response_content.message.is_some() {
+                eprintln!("Error: {}", response_content.message.as_ref().unwrap());
             }
+        }
+    }
+
+    pub fn mock_response() -> SearchResponse {
+        SearchResponse {
+            status: "mock response".to_string(),
+            user_tier: None,
+            total: None,
+            start_index: None,
+            page_size: None,
+            current_page: None,
+            pages: None,
+            order_by: None,
+            results: None,
+            message: None
         }
     }
 }
