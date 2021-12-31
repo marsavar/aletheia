@@ -198,6 +198,12 @@ impl GuardianContentClient {
         self
     }
 
+    pub fn use_date(&mut self, use_date: enums::UseDate) -> &mut GuardianContentClient {
+        self.request
+            .insert(String::from("use-date"), String::from(use_date.to_string()));
+        self
+    }
+
     /// Terminal operation hitting the /search endpoint.
     /// Once this function is called, all the query parameters constructed
     /// via the building methods are dropped.

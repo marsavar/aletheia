@@ -18,6 +18,15 @@ pub enum OrderDate {
 }
 
 #[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[strum(serialize_all = "kebab-case")]
+pub enum UseDate {
+    Published,
+    FirstPublication,
+    NewspaperEdition,
+    LastModified
+}
+
+#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "camelCase")]
 pub enum Field {
     TrailText,
