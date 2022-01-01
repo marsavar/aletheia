@@ -3,7 +3,7 @@
 //! It is built on top of `reqwest` and provides a similar interface
 //! for building queries.
 //!
-//! Responses returned by the client are serialized into structs
+//! Responses returned by the client are deserialized into structs
 //! mirroring the types used by the API.
 //!
 //! # Example
@@ -34,8 +34,8 @@
 pub mod enums;
 pub mod structs;
 
-use crate::structs::*;
 use crate::enums::*;
+use crate::structs::*;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
 use std::collections::HashMap;
@@ -43,15 +43,15 @@ use std::error::Error;
 use std::string::ToString;
 
 /// The main asynchronous client used to build requests to send to the Guardian's
-/// content API. This client maintains an internal asynchronous client implemented
-/// by `reqwest::Client`, but it is not publicly accessible.
+/// content API. This client maintains a private internal asynchronous client
+/// implemented by `reqwest::Client`
 #[derive(Debug)]
 pub struct GuardianContentClient {
     http_client: reqwest::Client,
     api_key: String,
     base_url: String,
     request: HashMap<String, String>,
-    endpoint: Endpoint
+    endpoint: Endpoint,
 }
 
 impl GuardianContentClient {
@@ -62,19 +62,20 @@ impl GuardianContentClient {
     /// modify the client's internal structure, therefore
     /// the client should be initialised with the `mut` keyword.
     ///
-    /// # Example
-    /// ```
-    /// let mut client = aletheia::GuardianContentClient("api-key-here");
-    /// ```
     /// API keys for the Guardian's content API can be requested at
     /// <https://open-platform.theguardian.com/access/>
+    ///
+    /// # Example
+    /// ```
+    /// let mut client = aletheia::GuardianContentClient("api-key-here")?;
+    /// ```
     pub fn new(api_key: &str) -> Result<GuardianContentClient, Box<dyn Error>> {
         let client = Self {
             http_client: Client::new(),
             base_url: String::from("https://content.guardianapis.com"),
             api_key: String::from(api_key),
             request: HashMap::new(),
-            endpoint: Endpoint::Content
+            endpoint: Endpoint::Content,
         };
         Ok(client)
     }
@@ -87,40 +88,141 @@ impl GuardianContentClient {
         headers
     }
 
+    /// Add a search query to the request.
+    ///
+    /// Supports AND, OR and NOT operators, and exact phrase queries using double quotes.
+    /// Examples of valid queries:
+    /// - "Barack Obama"
+    /// - Music
+    /// - Programming AND coding
+    ///
+    /// This field is only valid for the following endpoints:
+    ///
+    /// - `Endpoint::Content` (default endpoint, no need to explicitly set it)
+    /// - `Endpoint::Tags`
+    /// - `Endpoint::Sections`
+    /// - `Endpoint::Editions`
+    ///
+    /// Calling this method on `Endpoint::SingleItem` will
+    /// have no effect.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn search(&mut self, q: &str) -> &mut GuardianContentClient {
         self.request.insert(String::from("q"), q.to_string());
         self
     }
 
+    /// Add a page number to the request.
+    ///
+    /// Results are returned as a paginated list, with a default of 10 results.
+    /// In order to page through the results, you can pass the page number
+    /// as a parameter to this function.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .page(10)
+    ///         .send()
+    ///         .await?;
+    /// ```
+    ///
     pub fn page(&mut self, page: u32) -> &mut GuardianContentClient {
-        self.request
-            .insert(String::from("page"), page.to_string());
+        self.request.insert(String::from("page"), page.to_string());
         self
     }
 
-    /// Attaches a page size to the request.
+    /// Attach a page size to the request.
     ///
+    /// Results are returned as a paginated list, with a default of 10 results.
+    /// This function overrides the default.
     /// The page value must be between 0 and 200 for a successful response.
-    /// This constraint is enforced upstream by the content API.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .page_size(20)
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn page_size(&mut self, page: u8) -> &mut GuardianContentClient {
         self.request
-            .insert(String::from("page-size"),page.to_string());
+            .insert(String::from("page-size"), page.to_string());
         self
     }
 
+    /// Return results in the specified order.
+    ///
+    /// The function only accepts one of three `aletheia::enums` enum values:
+    /// - `OrderBy::Oldest`
+    /// - `OrderBy::Oldest`
+    /// - `OrderBy::Relevance`
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .order_by(OrderBy::Oldest)
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn order_by(&mut self, order_by: enums::OrderBy) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("order-by"), order_by.to_string());
         self
     }
 
+
+    /// Change which type of date is used to order the results
+    ///
+    /// The function only accepts one of three `aletheia::enums` enum values:
+    /// - `OrderDate::Published`
+    /// - `OrderDate::NewspaperEdition`
+    /// - `OrderDate::LastModified`
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .order_by(OrderDate::NewspaperEdition)
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn order_date(&mut self, order_date: enums::OrderDate) -> &mut GuardianContentClient {
-        self.request.insert(
-            String::from("order-date"),
-            order_date.to_string(),
-        );
+        self.request
+            .insert(String::from("order-date"), order_date.to_string());
         self
     }
+
+    /// Add fields associated with the content.
+    ///
+    /// The function accepts a vector of `aletheia::enums` values of type `Field`,
+    /// e.g.
+    /// - `Field::TrailText`
+    /// - `Field::Body`
+    /// - `Field::Byline`
+    ///
+    /// If `Field::All` is included in the vector, it will override all other fields.
+    ///
+    /// See <https://open-platform.theguardian.com/documentation/search>
+    /// for more information on all the possible fields,
+    /// or check the `aletheia::enums` section of the documentation.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .show_fields(vec![Field::StarRating, Field::ShortUrl])
+    ///         .send()
+    ///         .await?;
+    /// ```
 
     pub fn show_fields(&mut self, show_fields: Vec<enums::Field>) -> &mut GuardianContentClient {
         let field_sequence = crate::helpers::generate_sequence(show_fields);
@@ -131,8 +233,7 @@ impl GuardianContentClient {
 
     pub fn show_tags(&mut self, show_tags: Vec<enums::Tag>) -> &mut GuardianContentClient {
         let tag_sequence = crate::helpers::generate_sequence(show_tags);
-        self.request
-            .insert(String::from("show-tags"), tag_sequence);
+        self.request.insert(String::from("show-tags"), tag_sequence);
         self
     }
 
@@ -200,50 +301,36 @@ impl GuardianContentClient {
     }
 
     pub fn show_section(&mut self, show_section: bool) -> &mut GuardianContentClient {
-        self.request.insert(
-            String::from("show-section"),
-            show_section.to_string(),
-        );
+        self.request
+            .insert(String::from("show-section"), show_section.to_string());
         self
     }
 
     pub fn section(&mut self, section: &str) -> &mut GuardianContentClient {
-        self.request.insert(
-            String::from("section"),
-            section.to_string(),
-        );
+        self.request
+            .insert(String::from("section"), section.to_string());
         self
     }
 
     pub fn reference(&mut self, reference: &str) -> &mut GuardianContentClient {
-        self.request.insert(
-            String::from("reference"),
-            reference.to_string(),
-        );
+        self.request
+            .insert(String::from("reference"), reference.to_string());
         self
     }
 
     pub fn reference_type(&mut self, reference_type: &str) -> &mut GuardianContentClient {
-        self.request.insert(
-            String::from("reference-type"),
-            reference_type.to_string(),
-        );
+        self.request
+            .insert(String::from("reference-type"), reference_type.to_string());
         self
     }
 
     pub fn tag(&mut self, tag: &str) -> &mut GuardianContentClient {
-        self.request.insert(
-            String::from("tag"),
-            tag.to_string(),
-        );
+        self.request.insert(String::from("tag"), tag.to_string());
         self
     }
 
     pub fn ids(&mut self, ids: &str) -> &mut GuardianContentClient {
-        self.request.insert(
-            String::from("ids"),
-            ids.to_string(),
-        );
+        self.request.insert(String::from("ids"), ids.to_string());
         self
     }
 
@@ -256,22 +343,21 @@ impl GuardianContentClient {
     }
 
     pub fn lang(&mut self, lang: &str) -> &mut GuardianContentClient {
-        self.request.insert(
-            String::from("lang"),
-            lang.to_string(),
-        );
+        self.request.insert(String::from("lang"), lang.to_string());
         self
     }
 
     pub fn star_rating(&mut self, star_rating: u8) -> &mut GuardianContentClient {
-        self.request.insert(
-            String::from("star-rating"),
-            star_rating.to_string(),
-        );
+        self.request
+            .insert(String::from("star-rating"), star_rating.to_string());
         self
     }
 
-
+    pub fn r#type(&mut self, r#type: &str) -> &mut GuardianContentClient {
+        self.request
+            .insert(String::from("type"), r#type.to_string());
+        self
+    }
 
     pub fn show_blocks(&mut self, show_blocks: Vec<enums::Block>) -> &mut GuardianContentClient {
         let block_sequence = crate::helpers::generate_blocks(show_blocks);
@@ -298,8 +384,6 @@ impl GuardianContentClient {
         };
 
         let queries = Vec::from_iter(self.request.iter());
-
-        println!("Querying {}",format!("{}/{}?{:?}", self.base_url, endpoint, queries));
 
         let search = self
             .http_client

@@ -93,5 +93,5 @@ pub enum Endpoint {
     Tags,
     Sections,
     Editions,
-    SingleItem
+    SingleItem,
 }
