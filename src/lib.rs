@@ -198,8 +198,16 @@ impl GuardianContentClient {
     }
 
     pub fn show_section(&mut self, show_section: bool) -> &mut GuardianContentClient {
+        self.request.insert(
+            String::from("show-section"),
+            String::from(show_section.to_string()),
+        );
+        self
+    }
+
+    pub fn show_blocks(&mut self, show_blocks: &str) -> &mut GuardianContentClient {
         self.request
-            .insert(String::from("show-section"), String::from(show_section.to_string()));
+            .insert(String::from("show-blocks"), String::from(show_blocks));
         self
     }
 
@@ -240,8 +248,12 @@ mod helpers {
 
         if response.is_some() {
             let response_content = response.as_ref().unwrap();
-            if response_content.status == "error" && response_content.message.is_some() {
-                eprintln!("Error: {}", response_content.message.as_ref().unwrap());
+            if response_content.status.is_some() {
+                if response_content.status.as_ref().unwrap() == "error"
+                    && response_content.message.is_some()
+                {
+                    eprintln!("Error: {}", response_content.message.as_ref().unwrap());
+                }
             }
         }
     }
@@ -278,16 +290,16 @@ mod helpers {
 
     pub(crate) fn mock_response() -> SearchResponse {
         SearchResponse {
-            status: "".to_string(),
-            user_tier: "".to_string(),
-            total: 0,
-            start_index: 0,
-            page_size: 0,
-            current_page: 0,
-            pages: 0,
-            order_by: "".to_string(),
+            status: None,
+            user_tier: None,
+            total: None,
+            start_index: None,
+            page_size: None,
+            current_page: None,
+            pages: None,
+            order_by: None,
             results: None,
-            message: None
+            message: None,
         }
     }
 }
