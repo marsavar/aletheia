@@ -12,7 +12,8 @@ chrono = { version = "0.4", features = ["serde"] }
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0.132", features = ["derive"] }
-serde_with = { version = "1.11.0", features = ["default"]}
+serde_with = { version = "1.11.0", features = ["default"] }
+serde_json = { version = "1.0.73", features = ["raw_value"] }
 strum = "0.23"
 strum_macros = "0.23"
 
