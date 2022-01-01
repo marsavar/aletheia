@@ -24,6 +24,7 @@ pub struct SearchResponse {
     pub order_by: Option<String>,
     pub results: Option<Vec<SearchResult>>,
     pub message: Option<String>,
+    pub content: Option<Content>,
 }
 
 #[skip_serializing_none]
@@ -57,7 +58,7 @@ pub struct Fields {
 #[skip_serializing_none]
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Tags {
+pub struct Tag {
     pub id: String,
     pub r#type: String,
     pub web_title: String,
@@ -89,20 +90,21 @@ pub struct Tags {
 #[serde(rename_all = "camelCase")]
 pub struct SearchResult {
     pub id: String,
-    pub r#type: String,
-    pub section_id: String,
-    pub section_name: String,
-    pub web_publication_date: chrono::DateTime<Utc>,
+    pub r#type: Option<String>,
+    pub section_id: Option<String>,
+    pub section_name: Option<String>,
+    pub web_publication_date: Option<chrono::DateTime<Utc>>,
     pub web_title: String,
     pub web_url: String,
     pub api_url: String,
-    pub is_hosted: bool,
+    pub is_hosted: Option<bool>,
     pub pillar_id: Option<String>,
     pub pillar_name: Option<String>,
     pub fields: Option<Fields>,
-    pub tags: Option<Vec<Tags>>,
+    pub tags: Option<Vec<Tag>>,
     pub section: Option<Section>,
     pub blocks: Option<Blocks>,
+    pub editions: Option<Vec<Edition>>,
 }
 
 #[skip_serializing_none]
@@ -159,8 +161,6 @@ pub struct Block {
     pub published_date: Option<serde_json::Value>,
     pub last_modified_date: Option<serde_json::Value>,
     pub contributors: Vec<String>,
-    pub created_by: Option<User>,
-    pub last_modified_by: Option<User>,
     pub elements: Vec<BlockElement>,
 }
 
@@ -595,4 +595,78 @@ pub struct User {
     email: Option<String>,
     first_name: Option<String>,
     last_name: Option<String>,
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Content {
+    pub id: String,
+    pub r#type: String,
+    pub section_id: Option<String>,
+    pub section_name: Option<String>,
+    pub web_publication_date: Option<chrono::DateTime<Utc>>,
+    pub web_title: String,
+    pub web_url: String,
+    pub api_url: String,
+    pub fields: Option<ContentFields>,
+    pub tags: Vec<Tag>,
+    //pub elements: Option<Vec<Element>>,
+    pub references: Option<Vec<Reference>>,
+    pub is_expired: Option<bool>,
+    pub blocks: Option<Blocks>,
+    pub rights: Option<Rights>,
+    pub section: Option<Section>,
+    pub is_gone: Option<bool>,
+    pub is_hosted: bool,
+    pub pillar_id: Option<String>,
+    pub pillar_name: Option<String>,
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentFields {
+    pub headline: Option<String>,
+    pub standfirst: Option<String>,
+    pub trail_text: Option<String>,
+    pub byline: Option<String>,
+    pub main: Option<String>,
+    pub body: Option<String>,
+    pub newspaper_page_number: Option<i32>,
+    pub star_rating: Option<i32>,
+    pub contributor_bio: Option<String>,
+    pub membership_access: Option<String>,
+    pub wordcount: Option<i32>,
+    pub comment_close_date: Option<CapiDateTime>,
+    pub commentable: Option<bool>,
+    pub display_hint: Option<String>,
+    pub first_publication_date: Option<CapiDateTime>,
+    pub has_story_package: Option<bool>,
+    pub is_inappropriate_for_sponsorship: Option<bool>,
+    pub is_premoderated: Option<bool>,
+    pub last_modified: Option<CapiDateTime>,
+    pub live_blogging_now: Option<bool>,
+    pub newspaper_edition_date: Option<CapiDateTime>,
+    pub production_office: Option<String>,
+    pub publication: Option<String>,
+    pub scheduled_publication_date: Option<CapiDateTime>,
+    pub short_url: Option<String>,
+    pub should_hide_adverts: Option<bool>,
+    pub show_in_related_content: Option<bool>,
+    pub thumbnail: Option<String>,
+    pub legally_sensitive: Option<bool>,
+    pub allow_ugc: Option<bool>,
+    pub sensitive: Option<bool>,
+    pub lang: Option<String>,
+    pub is_live: Option<bool>,
+    pub internal_short_id: Option<String>,
+    pub short_social_share_text: Option<String>,
+    pub social_share_text: Option<String>,
+    pub body_text: Option<String>,
+    pub char_count: Option<i32>,
+    pub internal_video_code: Option<String>,
+    pub should_hide_reader_revenue: Option<bool>,
+    pub show_affiliate_links: Option<bool>,
+    pub byline_html: Option<String>,
 }

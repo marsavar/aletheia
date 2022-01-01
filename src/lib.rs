@@ -35,6 +35,7 @@ pub mod enums;
 pub mod structs;
 
 use crate::structs::*;
+use crate::enums::*;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
 use std::collections::HashMap;
@@ -48,8 +49,9 @@ use std::string::ToString;
 pub struct GuardianContentClient {
     http_client: reqwest::Client,
     api_key: String,
-    pub base_url: String,
-    pub request: HashMap<String, String>,
+    base_url: String,
+    request: HashMap<String, String>,
+    endpoint: Endpoint
 }
 
 impl GuardianContentClient {
@@ -72,6 +74,7 @@ impl GuardianContentClient {
             base_url: String::from("https://content.guardianapis.com"),
             api_key: String::from(api_key),
             request: HashMap::new(),
+            endpoint: Endpoint::Content
         };
         Ok(client)
     }
@@ -85,13 +88,13 @@ impl GuardianContentClient {
     }
 
     pub fn search(&mut self, q: &str) -> &mut GuardianContentClient {
-        self.request.insert(String::from("q"), String::from(q));
+        self.request.insert(String::from("q"), q.to_string());
         self
     }
 
     pub fn page(&mut self, page: u32) -> &mut GuardianContentClient {
         self.request
-            .insert(String::from("page"), String::from(page.to_string()));
+            .insert(String::from("page"), page.to_string());
         self
     }
 
@@ -101,20 +104,20 @@ impl GuardianContentClient {
     /// This constraint is enforced upstream by the content API.
     pub fn page_size(&mut self, page: u8) -> &mut GuardianContentClient {
         self.request
-            .insert(String::from("page-size"), String::from(page.to_string()));
+            .insert(String::from("page-size"),page.to_string());
         self
     }
 
     pub fn order_by(&mut self, order_by: enums::OrderBy) -> &mut GuardianContentClient {
         self.request
-            .insert(String::from("order-by"), String::from(order_by.to_string()));
+            .insert(String::from("order-by"), order_by.to_string());
         self
     }
 
     pub fn order_date(&mut self, order_date: enums::OrderDate) -> &mut GuardianContentClient {
         self.request.insert(
             String::from("order-date"),
-            String::from(order_date.to_string()),
+            order_date.to_string(),
         );
         self
     }
@@ -122,21 +125,21 @@ impl GuardianContentClient {
     pub fn show_fields(&mut self, show_fields: Vec<enums::Field>) -> &mut GuardianContentClient {
         let field_sequence = crate::helpers::generate_sequence(show_fields);
         self.request
-            .insert(String::from("show-fields"), String::from(field_sequence));
+            .insert(String::from("show-fields"), field_sequence);
         self
     }
 
     pub fn show_tags(&mut self, show_tags: Vec<enums::Tag>) -> &mut GuardianContentClient {
         let tag_sequence = crate::helpers::generate_sequence(show_tags);
         self.request
-            .insert(String::from("show-tags"), String::from(tag_sequence));
+            .insert(String::from("show-tags"), tag_sequence);
         self
     }
 
     pub fn query_fields(&mut self, query_fields: Vec<enums::Field>) -> &mut GuardianContentClient {
         let field_sequence = crate::helpers::generate_sequence(query_fields);
         self.request
-            .insert(String::from("query-fields"), String::from(field_sequence));
+            .insert(String::from("query-fields"), field_sequence);
         self
     }
 
@@ -192,17 +195,83 @@ impl GuardianContentClient {
 
     pub fn use_date(&mut self, use_date: enums::UseDate) -> &mut GuardianContentClient {
         self.request
-            .insert(String::from("use-date"), String::from(use_date.to_string()));
+            .insert(String::from("use-date"), use_date.to_string());
         self
     }
 
     pub fn show_section(&mut self, show_section: bool) -> &mut GuardianContentClient {
         self.request.insert(
             String::from("show-section"),
-            String::from(show_section.to_string()),
+            show_section.to_string(),
         );
         self
     }
+
+    pub fn section(&mut self, section: &str) -> &mut GuardianContentClient {
+        self.request.insert(
+            String::from("section"),
+            section.to_string(),
+        );
+        self
+    }
+
+    pub fn reference(&mut self, reference: &str) -> &mut GuardianContentClient {
+        self.request.insert(
+            String::from("reference"),
+            reference.to_string(),
+        );
+        self
+    }
+
+    pub fn reference_type(&mut self, reference_type: &str) -> &mut GuardianContentClient {
+        self.request.insert(
+            String::from("reference-type"),
+            reference_type.to_string(),
+        );
+        self
+    }
+
+    pub fn tag(&mut self, tag: &str) -> &mut GuardianContentClient {
+        self.request.insert(
+            String::from("tag"),
+            tag.to_string(),
+        );
+        self
+    }
+
+    pub fn ids(&mut self, ids: &str) -> &mut GuardianContentClient {
+        self.request.insert(
+            String::from("ids"),
+            ids.to_string(),
+        );
+        self
+    }
+
+    pub fn production_office(&mut self, production_office: &str) -> &mut GuardianContentClient {
+        self.request.insert(
+            String::from("production-office"),
+            production_office.to_string(),
+        );
+        self
+    }
+
+    pub fn lang(&mut self, lang: &str) -> &mut GuardianContentClient {
+        self.request.insert(
+            String::from("lang"),
+            lang.to_string(),
+        );
+        self
+    }
+
+    pub fn star_rating(&mut self, star_rating: u8) -> &mut GuardianContentClient {
+        self.request.insert(
+            String::from("star-rating"),
+            star_rating.to_string(),
+        );
+        self
+    }
+
+
 
     pub fn show_blocks(&mut self, show_blocks: Vec<enums::Block>) -> &mut GuardianContentClient {
         let block_sequence = crate::helpers::generate_blocks(show_blocks);
@@ -211,14 +280,30 @@ impl GuardianContentClient {
         self
     }
 
-    /// Terminal operation hitting the /search endpoint.
+    pub fn endpoint(&mut self, endpoint: enums::Endpoint) -> &mut GuardianContentClient {
+        self.endpoint = endpoint;
+        self
+    }
+
+    /// Terminal operation that sends a GET request to the Guardian API.
     /// Once this function is called, all the query parameters constructed
     /// via the building methods are dropped.
     pub async fn send(&mut self) -> Result<SearchResponse, Box<dyn Error>> {
+        let endpoint = match self.endpoint {
+            Endpoint::Content => String::from("search"),
+            Endpoint::Tags => String::from(self.endpoint.to_string()),
+            Endpoint::Sections => String::from(self.endpoint.to_string()),
+            Endpoint::Editions => String::from(self.endpoint.to_string()),
+            Endpoint::SingleItem => self.request.get("q").unwrap().to_string(),
+        };
+
         let queries = Vec::from_iter(self.request.iter());
+
+        println!("Querying {}",format!("{}/{}?{:?}", self.base_url, endpoint, queries));
+
         let search = self
             .http_client
-            .get(format!("{}/search", self.base_url))
+            .get(format!("{}/{}", self.base_url, endpoint))
             .headers(self.add_api_key_to_headers())
             .query(&queries)
             .send()
@@ -332,6 +417,7 @@ mod helpers {
             order_by: None,
             results: None,
             message: None,
+            content: None,
         }
     }
 }

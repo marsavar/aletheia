@@ -85,3 +85,13 @@ pub enum Block<'a> {
     BodyKeyEvents,
     BodyPublishedSince(i64),
 }
+
+#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[strum(serialize_all = "kebab-case")]
+pub enum Endpoint {
+    Content,
+    Tags,
+    Sections,
+    Editions,
+    SingleItem
+}
