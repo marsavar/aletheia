@@ -1,3 +1,6 @@
+//! Enum types that prevent passing illegal parameters to the
+//! Guardian's content API.
+
 use serde::{Deserialize, Serialize};
 use strum_macros::Display;
 

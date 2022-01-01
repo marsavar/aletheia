@@ -17,7 +17,7 @@
 //!     let mut client = GuardianContentClient::new("your-api-key")?;
 //!
 //!     let response = client
-//!         .search("rust")
+//!         .search("Elections")
 //!         .page_size(10)
 //!         .show_fields(vec![Field::Byline, Field::LastModified])
 //!         .order_by(OrderBy::Newest)
