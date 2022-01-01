@@ -1,10 +1,14 @@
 //! Aletheia is a client library for the Guardian's content API.
 //!
 //! It is built on top of `reqwest` and provides a similar interface
-//! for building queries.
+//! for building queries. Responses returned by the client are deserialized
+//! into structs, mirroring the types used by the API.
 //!
-//! Responses returned by the client are deserialized into structs
-//! mirroring the types used by the API.
+//! Keys to start querying the API can be obtained here:
+//! <https://open-platform.theguardian.com/access/>
+//!
+//! More information on the API can be found here:
+//! <https://open-platform.theguardian.com/documentation/>
 //!
 //! # Example
 //! ```
