@@ -596,12 +596,12 @@ impl GuardianContentClient {
     /// let response = client
     ///         .endpoint(Endpoint::Tag)
     ///         .search("Elections")
-    ///         .r#type("tv-and-radio/us-television")
+    ///         .tag_type("tv-and-radio/us-television")
     ///         .send()
     ///         .await?;
     ///
     /// ```
-    pub fn r#type(&mut self, r#type: &str) -> &mut GuardianContentClient {
+    pub fn tag_type(&mut self, r#type: &str) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("type"), r#type.to_string());
         self
