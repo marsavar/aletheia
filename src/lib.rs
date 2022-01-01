@@ -88,6 +88,42 @@ impl GuardianContentClient {
         headers
     }
 
+    /// Specify the Guardian API endpoint to target.
+    ///
+    /// Can be one of:
+    /// - `Endpoint::Content` (default): returns all pieces of content in the API.
+    /// - `Endpoint::Tags`: returns all tags in the API. All Guardian content is manually
+    /// categorised using these tags, of which there are more than 50,000.
+    /// - `Endpoint::Sections`:  returns all sections in the API.
+    /// - `Endpoint::Editions`: returns all editions in the API. Editions are the different
+    ///   front pages of the Guardian site (currently, there are editions for the United
+    /// Kingdom, the United States and Australia).
+    /// - `Endpoint::SingleItem`: returns all the data for a given single item id.
+    ///  Here the term 'item' refers to either a piece of content, a tag, or a section.
+    /// The item endpoint matches the paths on theguardian.com.
+    ///
+    /// # Example 1
+    /// ```
+    /// let response = client
+    ///         .endpoint(Endpoint::Tags)
+    ///         .search("food")
+    ///         .send()
+    ///         .await?;
+    /// ```
+    ///
+    /// # Example 2
+    /// ```
+    /// let response = client
+    ///         .endpoint(Endpoint::SingleItem)
+    ///         .search("books/2022/jan/01/2022-in-books-highlights-for-the-year-ahead")
+    ///         .send()
+    ///         .await?;
+    /// ```
+    pub fn endpoint(&mut self, endpoint: enums::Endpoint) -> &mut GuardianContentClient {
+        self.endpoint = endpoint;
+        self
+    }
+
     /// Add a search query to the request.
     ///
     /// Supports AND, OR and NOT operators, and exact phrase queries using double quotes.
@@ -178,7 +214,6 @@ impl GuardianContentClient {
             .insert(String::from("order-by"), order_by.to_string());
         self
     }
-
 
     /// Change which type of date is used to order the results
     ///
@@ -305,7 +340,7 @@ impl GuardianContentClient {
 
     /// Return only content published on or after that date.
     ///
-    /// It is more specific than date_from() as it accepts
+    /// It is more specific than `date_from()` as it accepts
     /// hours, minutes, seconds as well as a timezone offset.
     ///
     /// # Example
@@ -354,7 +389,7 @@ impl GuardianContentClient {
 
     /// Return only content published on or before that date.
     ///
-    /// It is more specific than datetime_to() as it accepts
+    /// It is more specific than `datetime_to()` as it accepts
     /// hours, minutes, seconds as well as a timezone offset.
     ///
     /// # Example
@@ -382,46 +417,135 @@ impl GuardianContentClient {
         self
     }
 
+    /// Change which type of date is used to filter the results using `date_from()`,
+    /// `datetime_from(), `date_to()` and `datetime_to()`.
+    ///
+    /// The function only accepts one of four `aletheia::enums` of type `UseDate`:
+    /// - `UseDate::Published` (default)
+    /// - `UseDate::FirstPublication`
+    /// - `UseDate::NewspaperEdition`
+    /// - `UseDate::LastModified`
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .date_from(2015, 1, 1)
+    ///         .date_to(2018, 12, 31)
+    ///         .use_date(UseDate::FirstPublication)
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn use_date(&mut self, use_date: enums::UseDate) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("use-date"), use_date.to_string());
         self
     }
 
+    /// Add associated metadata section.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .show_section(true)
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn show_section(&mut self, show_section: bool) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("show-section"), show_section.to_string());
         self
     }
 
+    /// Return only content in those sections.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .section("football")
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn section(&mut self, section: &str) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("section"), section.to_string());
         self
     }
 
+    /// Return only content with those references.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .reference("isbn/9780718178949")
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn reference(&mut self, reference: &str) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("reference"), reference.to_string());
         self
     }
 
+    /// Return only content with references of those types.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .reference_type("isbn")
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn reference_type(&mut self, reference_type: &str) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("reference-type"), reference_type.to_string());
         self
     }
 
+    /// Return only content with those tags.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .tag("technology/apple")
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn tag(&mut self, tag: &str) -> &mut GuardianContentClient {
         self.request.insert(String::from("tag"), tag.to_string());
         self
     }
 
+    /// Return only content with those IDs.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .ids("world/2022/jan/01/funeral-of-desmond-tutu-takes-place-in-cape-town")
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn ids(&mut self, ids: &str) -> &mut GuardianContentClient {
         self.request.insert(String::from("ids"), ids.to_string());
         self
     }
 
+    /// Return only content from those production offices.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .production_office("UK")
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn production_office(&mut self, production_office: &str) -> &mut GuardianContentClient {
         self.request.insert(
             String::from("production-office"),
@@ -430,23 +554,85 @@ impl GuardianContentClient {
         self
     }
 
+    /// Return only content in those languages.
+    /// Accepts ISO language codes, e.g. en, fr.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .lang("en")
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn lang(&mut self, lang: &str) -> &mut GuardianContentClient {
         self.request.insert(String::from("lang"), lang.to_string());
         self
     }
 
+    /// Return only content with a given star rating
+    /// ranging from 1 to 5.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .star_rating(5)
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn star_rating(&mut self, star_rating: u8) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("star-rating"), star_rating.to_string());
         self
     }
 
+    /// Return only tags of that type.
+    /// Only valid if the endpoint is set to
+    /// `aletheia::enums::Endpoint::Tag`
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .endpoint(Endpoint::Tag)
+    ///         .search("Elections")
+    ///         .r#type("tv-and-radio/us-television")
+    ///         .send()
+    ///         .await?;
+    ///
+    /// ```
     pub fn r#type(&mut self, r#type: &str) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("type"), r#type.to_string());
         self
     }
 
+    /// Add associated blocks (single block for content, one or more for liveblogs).
+    ///
+    /// Supports the following `aletheia::enum` types:
+    ///
+    /// - `Block::Main`
+    /// - `Block::Body`
+    /// - `Block::All`
+    /// - `Block::BodyLatest` (limit defaults to 20)
+    /// - `Block::BodyLatestWith(i32)` (override the limits)
+    /// - `Block::BodyOldest`
+    /// - `Block::BodyOldestWith(i32)`
+    /// - `Block::BodyBlockId(&'a str)` (only the block with that ID)
+    /// - `Block::BodyAroundBlockId(&'a str)` (the specified block and 20 blocks either side of it)
+    /// - `Block::BodyAroundBlockIdWith(&'a str, i32)` (the specified block and n blocks either side of it)
+    /// - `Block::BodyKeyEvents`
+    /// - `Block::BodyPublishedSince(i64)`  (only blocks since given timestamp)
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .endpoint(Endpoint::Tag)
+    ///         .search("Elections")
+    ///         .show_blocks(Block::BodyPublishedSince(1556529318000))
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn show_blocks(&mut self, show_blocks: Vec<enums::Block>) -> &mut GuardianContentClient {
         let block_sequence = crate::helpers::generate_blocks(show_blocks);
         self.request
@@ -454,10 +640,6 @@ impl GuardianContentClient {
         self
     }
 
-    pub fn endpoint(&mut self, endpoint: enums::Endpoint) -> &mut GuardianContentClient {
-        self.endpoint = endpoint;
-        self
-    }
 
     /// Terminal operation that sends a GET request to the Guardian API.
     /// Once this function is called, all the query parameters constructed
