@@ -223,7 +223,6 @@ impl GuardianContentClient {
     ///         .send()
     ///         .await?;
     /// ```
-
     pub fn show_fields(&mut self, show_fields: Vec<enums::Field>) -> &mut GuardianContentClient {
         let field_sequence = crate::helpers::generate_sequence(show_fields);
         self.request
@@ -231,12 +230,54 @@ impl GuardianContentClient {
         self
     }
 
+    /// Add associated metadata tags.
+    ///
+    /// The function accepts a vector of `aletheia::enums` values of type `Tag`,
+    /// e.g.
+    /// - `Tag::Blog`
+    /// - `Tag::Contributor`
+    /// - `Tag::Tone`
+    ///
+    /// If `Tag::All` is included in the vector, it will override all other tags.
+    ///
+    /// See <https://open-platform.theguardian.com/documentation/search>
+    /// for more information on all the possible tags,
+    /// or check the `aletheia::enums` section of the documentation.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .show_tags(vec![Tag::Contributor, Tag::Type, Tag::Tone])
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn show_tags(&mut self, show_tags: Vec<enums::Tag>) -> &mut GuardianContentClient {
         let tag_sequence = crate::helpers::generate_sequence(show_tags);
         self.request.insert(String::from("show-tags"), tag_sequence);
         self
     }
 
+    /// Specify in which indexed fields query terms should be searched on
+    ///
+    /// The function accepts a vector of `aletheia::enums` values of type `Field`,
+    /// e.g.
+    /// - `Field::TrailText`
+    /// - `Field::Body`
+    /// - `Field::Byline`
+    ///
+    /// See <https://open-platform.theguardian.com/documentation/search>
+    /// for more information on all the possible fields,
+    /// or check the `aletheia::enums` section of the documentation.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .query_fields(vec![Field::Body])
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn query_fields(&mut self, query_fields: Vec<enums::Field>) -> &mut GuardianContentClient {
         let field_sequence = crate::helpers::generate_sequence(query_fields);
         self.request
@@ -244,6 +285,16 @@ impl GuardianContentClient {
         self
     }
 
+    /// Return only content published on or after that date.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .date_from(2020, 1, 1)
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn date_from(&mut self, year: i32, month: u32, day: u32) -> &mut GuardianContentClient {
         self.request.insert(
             String::from("from-date"),
@@ -252,6 +303,19 @@ impl GuardianContentClient {
         self
     }
 
+    /// Return only content published on or after that date.
+    ///
+    /// It is more specific than date_from() as it accepts
+    /// hours, minutes, seconds as well as a timezone offset.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .datetime_from(2020, 1, 1, 12, 0, 0, 2)
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn datetime_from(
         &mut self,
         year: i32,
@@ -269,6 +333,17 @@ impl GuardianContentClient {
         self
     }
 
+    /// Return only content published on or before that date.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .date_from(2008, 1, 1)
+    ///         .date_to(2010, 12, 31)
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn date_to(&mut self, year: i32, month: u32, day: u32) -> &mut GuardianContentClient {
         self.request.insert(
             String::from("to-date"),
@@ -277,6 +352,19 @@ impl GuardianContentClient {
         self
     }
 
+    /// Return only content published on or before that date.
+    ///
+    /// It is more specific than datetime_to() as it accepts
+    /// hours, minutes, seconds as well as a timezone offset.
+    ///
+    /// # Example
+    /// ```
+    /// let response = client
+    ///         .search("Elections")
+    ///         .datetime_to(2016, 1, 1, 12, 0, 0, 5)
+    ///         .send()
+    ///         .await?;
+    /// ```
     pub fn datetime_to(
         &mut self,
         year: i32,
