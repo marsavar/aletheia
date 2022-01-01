@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use strum_macros::Display;
 
 #[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
-#[strum(serialize_all = "camelCase")]
+#[strum(serialize_all = "kebab-case")]
 pub enum OrderBy {
     Newest,
     Oldest,
@@ -55,7 +55,7 @@ pub enum Field {
 }
 
 #[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
-#[strum(serialize_all = "camelCase")]
+#[strum(serialize_all = "kebab-case")]
 pub enum Tag {
     Blog,
     Contributor,
@@ -67,4 +67,21 @@ pub enum Tag {
     Tone,
     Type,
     All,
+}
+
+#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[strum(serialize_all = "kebab-case")]
+pub enum Block<'a> {
+    Main,
+    Body,
+    All,
+    BodyLatest,
+    BodyLatestWith(i32),
+    BodyOldest,
+    BodyOldestWith(i32),
+    BodyBlockId(&'a str),
+    BodyAroundBlockId(&'a str),
+    BodyAroundBlockIdWith(&'a str, i32),
+    BodyKeyEvents,
+    BodyPublishedSince(i64),
 }

@@ -34,7 +34,6 @@
 pub mod enums;
 pub mod structs;
 
-use crate::enums::*;
 use crate::structs::*;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
@@ -205,9 +204,10 @@ impl GuardianContentClient {
         self
     }
 
-    pub fn show_blocks(&mut self, show_blocks: &str) -> &mut GuardianContentClient {
+    pub fn show_blocks(&mut self, show_blocks: Vec<enums::Block>) -> &mut GuardianContentClient {
+        let block_sequence = crate::helpers::generate_blocks(show_blocks);
         self.request
-            .insert(String::from("show-blocks"), String::from(show_blocks));
+            .insert(String::from("show-blocks"), block_sequence);
         self
     }
 
@@ -238,7 +238,8 @@ impl GuardianContentClient {
 }
 
 mod helpers {
-    use crate::{enums, Field, SearchResponse, Tag};
+    use crate::enums::Block;
+    use crate::{enums, SearchResponse};
     use chrono::{FixedOffset, TimeZone};
 
     pub(crate) fn std_err(message: &Option<String>, response: &Option<SearchResponse>) {
@@ -259,11 +260,42 @@ mod helpers {
     }
 
     pub(crate) fn generate_sequence<T: std::fmt::Display>(items: Vec<T>) -> String {
-        let items_to_strings = items.iter().map(|item| item.to_string());
-        return if let Some(all) = items_to_strings.clone().find(|x| x == "all") {
-            all
+        let items_to_strings = items
+            .into_iter()
+            .map(|item| item.to_string())
+            .collect::<Vec<String>>();
+        return if items_to_strings.contains(&String::from("all")) {
+            String::from("all")
         } else {
-            items_to_strings.collect::<Vec<String>>().join(",")
+            items_to_strings.join(",")
+        };
+    }
+
+    pub(crate) fn generate_blocks(items: Vec<enums::Block>) -> String {
+        let items_to_strings = items
+            .into_iter()
+            .map(|item| match item {
+                Block::Main => item.to_string(),
+                Block::Body => item.to_string(),
+                Block::All => item.to_string(),
+                Block::BodyLatest => String::from("body:latest"),
+                Block::BodyLatestWith(n) => format!("body:latest:{}", n),
+                Block::BodyOldest => String::from("body:latest"),
+                Block::BodyOldestWith(n) => format!("body:oldest:{}", n),
+                Block::BodyBlockId(id) => format!("body:{}", id),
+                Block::BodyAroundBlockId(id) => format!("body:around:{}", id),
+                Block::BodyAroundBlockIdWith(id, n) => {
+                    format!("body:around:{}:{}", String::from(id), n)
+                }
+                Block::BodyKeyEvents => String::from("body:key-events"),
+                Block::BodyPublishedSince(n) => format!("body:published-since:{}", n),
+            })
+            .collect::<Vec<String>>();
+
+        return if items_to_strings.contains(&String::from("all")) {
+            String::from("all")
+        } else {
+            items_to_strings.join(",")
         };
     }
 
