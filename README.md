@@ -6,7 +6,7 @@ Aletheia is a client library for [the Guardian](https://www.theguardian.com)'s c
 
 
 ## How to use
-Simply add `aletheia` line to the list of dependencies in your `Cargo.toml` file
+Simply add `aletheia` to the list of dependencies in your `Cargo.toml` file
 
 ```
 [dependencies]
