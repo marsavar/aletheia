@@ -15,7 +15,8 @@ aletheia = "0.1.0"
 
 ## Example
 
-Let's say you were interested in finding the five most recent theatre play reviews with a rating of 5 stars.
+Let's say you were interested in finding the five most recent film, play or album reviews with a rating of 5 stars 
+containing the word "politics".
 The code would look something like the example below, and would consist of three steps:
 
 1) Constructing the HTTP client
@@ -35,9 +36,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     
     // Query parameters are built incrementally
     let response = client
-        .search("theatre")
+        .search("politics")
         .star_rating(5)
-        .page_size(10)
+        .page_size(5)
         .show_fields(vec![Field::Byline, Field::ShortUrl])
         .order_by(OrderBy::Newest)
         .send()
@@ -69,18 +70,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 The above will return the following results.
 ```
-"Hannah Gadsby – Body of Work: a joyful guide to blasting Netflix and messing with Christian bakers" 
-by Steve Dow (https://www.theguardian.com/p/kv8vx)
-
-"The Play What I Wrote review – Tom Hiddleston has a laugh in farce masterclass" 
-by Mark Lawson (https://www.theguardian.com/p/jq44j)
-
-"West Side Story review – Spielberg’s triumphantly hyperreal remake" 
-by Peter Bradshaw (https://www.theguardian.com/p/jnqdx)
-
-"Death of England: Face to Face review – state of the nation drama is a fast, furious triumph" 
-by Lucy Mangan (https://www.theguardian.com/p/jypxc)
-
 "Licorice Pizza review – Paul Thomas Anderson’s funniest and most relaxed film yet" 
 by Peter Bradshaw (https://www.theguardian.com/p/jtm7m)
+
+"Rina Sawayama review – superstar status cemented by pop’s politician" 
+by Fergal Kinney (https://www.theguardian.com/p/jh9tx)
+
+"Burning review – the searing black summer documentary that Australia deserves" 
+by Luke Buckmaster (https://www.theguardian.com/p/jeqg5)
+
+"Harry Potter and the Philosopher’s Stone review – 20 years on, it’s a nostalgic spectacular" 
+by Peter Bradshaw (https://www.theguardian.com/p/japa7)
+
+"‘Some of art’s most luxurious orgies’ – Poussin and the Dance review" 
+by Jonathan Jones (https://www.theguardian.com/p/j5kkp)
 ```
