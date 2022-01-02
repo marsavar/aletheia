@@ -644,7 +644,6 @@ impl GuardianContentClient {
         self
     }
 
-
     /// Terminal operation that sends a GET request to the Guardian API.
     /// Once this function is called, all the query parameters constructed
     /// via the building methods are dropped.

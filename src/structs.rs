@@ -4,7 +4,6 @@
 //! by Thrift with manual tweaks using existing
 //! Thrift definitions.
 
-
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
