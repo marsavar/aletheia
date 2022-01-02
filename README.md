@@ -7,7 +7,7 @@ Aletheia is an HTTP client library for [the Guardian](https://www.theguardian.co
 ## How to use it
 Simply add `aletheia` to the list of dependencies in your `Cargo.toml` file
 
-```rust
+```toml
 [dependencies]
 aletheia = "0.1.0"
 ```
