@@ -18,7 +18,7 @@
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn Error>> {
-//!     let mut client = GuardianContentClient::new("your-api-key")?;
+//!     let mut client = GuardianContentClient::new("your-api-key");
 //!
 //!     let response = client
 //!         .search("Elections")
@@ -34,6 +34,9 @@
 //!     Ok(())
 //! }
 //! ```
+
+#[cfg(test)]
+mod tests;
 
 pub mod enums;
 pub mod structs;
@@ -62,26 +65,26 @@ impl GuardianContentClient {
     /// Constructor for the client.
     /// The constructor takes an API key which is then stored internally
     /// in the struct. The client then uses the builder pattern
-    /// to add query parameters to the request. These methods
-    /// modify the client's internal structure, therefore
-    /// the client should be initialised with the `mut` keyword.
+    /// to add query parameters to the request. The query-building
+    /// methods as well as the terminal operation take a mutable borrow
+    /// of self. This allows the client not to be consumed after a request.
+    /// As a result, the client should be initialised with the `mut` keyword.
     ///
     /// API keys for the Guardian's content API can be requested at
     /// <https://open-platform.theguardian.com/access/>
     ///
     /// # Example
     /// ```
-    /// let mut client = aletheia::GuardianContentClient("api-key-here")?;
+    /// let mut client = aletheia::GuardianContentClient("api-key-here");
     /// ```
-    pub fn new(api_key: &str) -> Result<GuardianContentClient, Box<dyn Error>> {
-        let client = Self {
+    pub fn new(api_key: &str) -> GuardianContentClient {
+        Self {
             http_client: Client::new(),
             base_url: String::from("https://content.guardianapis.com"),
             api_key: String::from(api_key),
             request: HashMap::new(),
             endpoint: Endpoint::Content,
-        };
-        Ok(client)
+        }
     }
 
     fn add_api_key_to_headers(&self) -> HeaderMap {
@@ -201,7 +204,7 @@ impl GuardianContentClient {
     /// Return results in the specified order.
     ///
     /// The function only accepts one of three `aletheia::enums` enum values:
-    /// - `OrderBy::Oldest`
+    /// - `OrderBy::Newest`
     /// - `OrderBy::Oldest`
     /// - `OrderBy::Relevance`
     ///

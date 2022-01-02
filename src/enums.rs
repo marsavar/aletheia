@@ -39,7 +39,7 @@ pub enum Field {
     LastModified,
     HasStoryPackage,
     Score,
-    StandFirst,
+    Standfirst,
     ShortUrl,
     Byline,
     Thumbnail,
