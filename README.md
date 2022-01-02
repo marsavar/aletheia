@@ -1,17 +1,19 @@
 # Aletheia
 
-> Aletheia is truth or disclosure in philosophy. The literal meaning of the word ἀλήθεια is "the state of not being hidden; the state of being evident."
+> Aletheia is truth or disclosure (...) The literal meaning of the word ἀλήθεια is "the state of not being hidden; the state of being evident."
 
-Aletheia is a client library for [the Guardian](https://www.theguardian.com)'s content API written in Rust.
+Aletheia is an HTTP client library for [the Guardian](https://www.theguardian.com)'s [content API](https://open-platform.theguardian.com) written in Rust.
 
-
-## How to use
+## How to use it
 Simply add `aletheia` to the list of dependencies in your `Cargo.toml` file
 
-```
+```rust
 [dependencies]
 aletheia = "0.1.0"
 ```
+
+You need an API key to be able to make requests. 
+Keys can be requested [here](https://open-platform.theguardian.com/access/). 
 
 ## Example
 
@@ -32,7 +34,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     
     // The client is constructed by passing your API key
     // as the only parameter
-    let mut client = GuardianContentClient::new("your_api_key")?;
+    let mut client = GuardianContentClient::new("your_api_key");
     
     // Query parameters are built incrementally
     let response = client

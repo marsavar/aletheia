@@ -6,6 +6,8 @@ description = "A client library for the Guardian's content API"
 license = "MIT"
 documentation = "https://docs.rs/aletheia"
 repository = "https://github.com/MarSavar/aletheia/"
+keywords = ["guardian", "api", "client", "library", "http"]
+categories = ["api-bindings", "parsing", "web-programming::http-client"]
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
@@ -16,4 +18,3 @@ serde_with = { version = "1.11.0", features = ["default"] }
 serde_json = { version = "1.0.73", features = ["raw_value"] }
 strum = "0.23"
 strum_macros = "0.23"
-
