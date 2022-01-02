@@ -86,7 +86,7 @@ impl GuardianContentClient {
 
     fn add_api_key_to_headers(&self) -> HeaderMap {
         let mut headers = HeaderMap::new();
-        if self.api_key.len() > 0 {
+        if !self.api_key.is_empty() {
             headers.insert("api-key", HeaderValue::from_str(&self.api_key[..]).unwrap());
         }
         headers
@@ -650,9 +650,9 @@ impl GuardianContentClient {
     pub async fn send(&mut self) -> Result<SearchResponse, Box<dyn Error>> {
         let endpoint = match self.endpoint {
             Endpoint::Content => String::from("search"),
-            Endpoint::Tags => String::from(self.endpoint.to_string()),
-            Endpoint::Sections => String::from(self.endpoint.to_string()),
-            Endpoint::Editions => String::from(self.endpoint.to_string()),
+            Endpoint::Tags => self.endpoint.to_string(),
+            Endpoint::Sections => self.endpoint.to_string(),
+            Endpoint::Editions => self.endpoint.to_string(),
             Endpoint::SingleItem => self.request.get("q").unwrap().to_string(),
         };
 
@@ -705,11 +705,11 @@ mod helpers {
             .into_iter()
             .map(|item| item.to_string())
             .collect::<Vec<String>>();
-        return if items_to_strings.contains(&String::from("all")) {
+        if items_to_strings.contains(&String::from("all")) {
             String::from("all")
         } else {
             items_to_strings.join(",")
-        };
+        }
     }
 
     pub(crate) fn generate_blocks(items: Vec<enums::Block>) -> String {
@@ -733,11 +733,11 @@ mod helpers {
             })
             .collect::<Vec<String>>();
 
-        return if items_to_strings.contains(&String::from("all")) {
+        if items_to_strings.contains(&String::from("all")) {
             String::from("all")
         } else {
             items_to_strings.join(",")
-        };
+        }
     }
 
     pub(crate) fn datetime(
