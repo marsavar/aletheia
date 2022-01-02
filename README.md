@@ -1,15 +1,31 @@
 # Aletheia
 
-> The literal meaning of the word ἀλήθεια is "the state of not being hidden; the state of being evident."
+> Aletheia is truth or disclosure in philosophy. The literal meaning of the word ἀλήθεια is "the state of not being hidden; the state of being evident."
 
-Aletheia is a client library for the Guardian's content API written in Rust.
+Aletheia is a client library for [the Guardian](https://www.theguardian.com)'s content API written in Rust.
 
+
+## How to use
+Simply add `aletheia` line to the list of dependencies in your `Cargo.toml` file
+
+```
+[dependencies]
+aletheia = "0.1.0"
+```
 
 ## Example
 
-Let's say you were interested in finding the ten most recent theatre play reviews with a rating of 5 stars.
+Let's say you were interested in finding the five most recent theatre play reviews with a rating of 5 stars.
+The code would look something like the example below, and would consist of three steps:
 
+1) Constructing the HTTP client
+2) Building the query
+3) Parsing the response
 ```rust
+use aletheia::enums::*;
+use aletheia::GuardianContentClient;
+use std::error::Error;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     
@@ -36,7 +52,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(fields) = result.fields {
                 match (fields.byline, fields.short_url) {
                     (Some(byline), Some(short_url)) => println!(
-                        "\"{}\" by {} ({})",
+                        "\"{}\" \nby {} ({})\n",
                         result.web_title.trim(),
                         byline,
                         short_url
@@ -53,15 +69,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 The above will return the following results.
 ```
-"Hannah Gadsby – Body of Work: a joyful guide to blasting Netflix and messing with Christian bakers" by Steve Dow (https://www.theguardian.com/p/kv8vx)
-"The Play What I Wrote review – Tom Hiddleston has a laugh in farce masterclass" by Mark Lawson (https://www.theguardian.com/p/jq44j)
-"West Side Story review – Spielberg’s triumphantly hyperreal remake" by Peter Bradshaw (https://www.theguardian.com/p/jnqdx)
-"Death of England: Face to Face review – state of the nation drama is a fast, furious triumph" by Lucy Mangan (https://www.theguardian.com/p/jypxc)
-"Licorice Pizza review – Paul Thomas Anderson’s funniest and most relaxed film yet" by Peter Bradshaw (https://www.theguardian.com/p/jtm7m)
-"The week in classical: Life, Letters & Friendship; Bluebeard’s Castle – review" by Stephen Pritchard (https://www.theguardian.com/p/jhazq)
-"Bluebeard’s Castle review – Bartók’s opera wields devastating power in contrasting performances" by Tim Ashley (https://www.theguardian.com/p/jgb5a)
-"Brief Encounter review – sparkling revival of Emma Rice’s forbidden romance" by Anya Ryan (https://www.theguardian.com/p/ja66d)
-"Liz Kingsman: One-Woman Show review – wicked, whip-smart skewering of Fleabag and co" by Brian Logan (https://www.theguardian.com/p/j8gnz)
-"Belfast review – Kenneth Branagh’s euphoric eulogy to his home city" by Peter Bradshaw (https://www.theguardian.com/p/j62tm)
+"Hannah Gadsby – Body of Work: a joyful guide to blasting Netflix and messing with Christian bakers" 
+by Steve Dow (https://www.theguardian.com/p/kv8vx)
 
+"The Play What I Wrote review – Tom Hiddleston has a laugh in farce masterclass" 
+by Mark Lawson (https://www.theguardian.com/p/jq44j)
+
+"West Side Story review – Spielberg’s triumphantly hyperreal remake" 
+by Peter Bradshaw (https://www.theguardian.com/p/jnqdx)
+
+"Death of England: Face to Face review – state of the nation drama is a fast, furious triumph" 
+by Lucy Mangan (https://www.theguardian.com/p/jypxc)
+
+"Licorice Pizza review – Paul Thomas Anderson’s funniest and most relaxed film yet" 
+by Peter Bradshaw (https://www.theguardian.com/p/jtm7m)
 ```
