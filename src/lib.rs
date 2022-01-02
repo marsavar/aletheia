@@ -691,12 +691,11 @@ mod helpers {
 
         if response.is_some() {
             let response_content = response.as_ref().unwrap();
-            if response_content.status.is_some() {
-                if response_content.status.as_ref().unwrap() == "error"
-                    && response_content.message.is_some()
-                {
-                    eprintln!("Error: {}", response_content.message.as_ref().unwrap());
-                }
+            if response_content.status.is_some()
+                && response_content.status.as_ref().unwrap() == "error"
+                && response_content.message.is_some()
+            {
+                eprintln!("Error: {}", response_content.message.as_ref().unwrap());
             }
         }
     }

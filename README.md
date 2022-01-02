@@ -51,14 +51,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     if let Some(results) = response.results {
         results.into_iter().for_each(|result| {
             if let Some(fields) = result.fields {
-                match (fields.byline, fields.short_url) {
-                    (Some(byline), Some(short_url)) => println!(
+                if let (Some(byline), Some(short_url)) = (fields.byline, fields.short_url) {
+                    println!(
                         "\"{}\" \nby {} ({})\n",
                         result.web_title.trim(),
                         byline,
                         short_url
-                    ),
-                    _ => {}
+                    )
                 }
             }
         });
