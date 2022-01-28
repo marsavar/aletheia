@@ -5,22 +5,22 @@
 Aletheia is an HTTP client library for [the Guardian](https://www.theguardian.com)'s [content API](https://open-platform.theguardian.com) written in Rust.
 
 ## How to use it
-Aletheia requires Tokio as a dependency to execute asynchronous code.
+Aletheia requires Tokio as a dependency to execute asynchronous code.\
 Simply add `aletheia` and `tokio` to the list of dependencies in your `Cargo.toml` file.
 
 ```toml
 [dependencies]
-aletheia = "0.1.0"
+aletheia = "0.1.1"
 tokio = { version = "1", features = ["full"] }
 ```
 
-You need an API key to be able to make requests. 
+You also need an API key to be able to make requests. 
 Keys can be requested [here](https://open-platform.theguardian.com/access/). 
 
 ## Example
 
-Let's say you were interested in finding the five most recent film, play or album reviews with a rating of 5 stars 
-containing the word "politics".
+Let's say you were interested in finding five film, play or album reviews with a rating of 5 stars 
+containing the word "politics" published from October to December 2021.
 The code would look something like the example below, and would consist of three steps:
 
 1) Constructing the HTTP client
@@ -41,6 +41,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // Query parameters are built incrementally
     let response = client
         .search("politics")
+        .date_from(2021, 10, 1)
+        .date_to(2021, 12, 31)
         .star_rating(5)
         .page_size(5)
         .show_fields(vec![Field::Byline, Field::ShortUrl])
