@@ -11,7 +11,7 @@
 //! <https://open-platform.theguardian.com/documentation/>
 //!
 //! # Example
-//! ```
+//! ```ignore
 //! use std::error::Error;
 //! use aletheia::GuardianContentClient;
 //! use aletheia::enums::{Field, OrderBy, OrderDate};
@@ -74,7 +74,7 @@ impl GuardianContentClient {
     /// <https://open-platform.theguardian.com/access/>
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let mut client = aletheia::GuardianContentClient("api-key-here");
     /// ```
     pub fn new(api_key: &str) -> GuardianContentClient {
@@ -90,7 +90,7 @@ impl GuardianContentClient {
     fn add_api_key_to_headers(&self) -> HeaderMap {
         let mut headers = HeaderMap::new();
         if !self.api_key.is_empty() {
-            headers.insert("api-key", HeaderValue::from_str(&self.api_key[..]).unwrap());
+            headers.insert("api-key", HeaderValue::from_str(&self.api_key).unwrap());
         }
         headers
     }
@@ -110,7 +110,7 @@ impl GuardianContentClient {
     /// The item endpoint matches the paths on theguardian.com.
     ///
     /// # Example 1
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .endpoint(Endpoint::Tags)
     ///         .search("food")
@@ -119,7 +119,7 @@ impl GuardianContentClient {
     /// ```
     ///
     /// # Example 2
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .endpoint(Endpoint::SingleItem)
     ///         .search("books/2022/jan/01/2022-in-books-highlights-for-the-year-ahead")
@@ -150,7 +150,7 @@ impl GuardianContentClient {
     /// have no effect.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .send()
@@ -168,7 +168,7 @@ impl GuardianContentClient {
     /// as a parameter to this function.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .page(10)
@@ -188,7 +188,7 @@ impl GuardianContentClient {
     /// The page value must be between 0 and 200 for a successful response.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .page_size(20)
@@ -209,7 +209,7 @@ impl GuardianContentClient {
     /// - `OrderBy::Relevance`
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .order_by(OrderBy::Oldest)
@@ -230,13 +230,13 @@ impl GuardianContentClient {
     /// - `OrderDate::LastModified`
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .order_by(OrderDate::NewspaperEdition)
     ///         .send()
     ///         .await?;
-    /// ```
+    /// ```ignore
     pub fn order_date(&mut self, order_date: enums::OrderDate) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("order-date"), order_date.to_string());
@@ -258,7 +258,7 @@ impl GuardianContentClient {
     /// or check the `aletheia::enums` section of the documentation.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .show_fields(vec![Field::StarRating, Field::ShortUrl])
@@ -287,7 +287,7 @@ impl GuardianContentClient {
     /// or check the `aletheia::enums` section of the documentation.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .show_tags(vec![Tag::Contributor, Tag::Type, Tag::Tone])
@@ -313,7 +313,7 @@ impl GuardianContentClient {
     /// or check the `aletheia::enums` section of the documentation.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .query_fields(vec![Field::Body])
@@ -330,7 +330,7 @@ impl GuardianContentClient {
     /// Return only content published on or after that date.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .date_from(2020, 1, 1)
@@ -351,13 +351,14 @@ impl GuardianContentClient {
     /// hours, minutes, seconds as well as a timezone offset.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .datetime_from(2020, 1, 1, 12, 0, 0, 2)
     ///         .send()
     ///         .await?;
     /// ```
+    #[allow(clippy::too_many_arguments)]
     pub fn datetime_from(
         &mut self,
         year: i32,
@@ -378,7 +379,7 @@ impl GuardianContentClient {
     /// Return only content published on or before that date.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .date_from(2008, 1, 1)
@@ -400,13 +401,14 @@ impl GuardianContentClient {
     /// hours, minutes, seconds as well as a timezone offset.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .datetime_to(2016, 1, 1, 12, 0, 0, 5)
     ///         .send()
     ///         .await?;
     /// ```
+    #[allow(clippy::too_many_arguments)]
     pub fn datetime_to(
         &mut self,
         year: i32,
@@ -434,7 +436,7 @@ impl GuardianContentClient {
     /// - `UseDate::LastModified`
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .date_from(2015, 1, 1)
@@ -452,7 +454,7 @@ impl GuardianContentClient {
     /// Add associated metadata section.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .show_section(true)
@@ -468,7 +470,7 @@ impl GuardianContentClient {
     /// Return only content in those sections.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .section("football")
@@ -484,7 +486,7 @@ impl GuardianContentClient {
     /// Return only content with those references.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .reference("isbn/9780718178949")
@@ -500,7 +502,7 @@ impl GuardianContentClient {
     /// Return only content with references of those types.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .reference_type("isbn")
@@ -516,7 +518,7 @@ impl GuardianContentClient {
     /// Return only content with those tags.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .tag("technology/apple")
@@ -531,7 +533,7 @@ impl GuardianContentClient {
     /// Return only content with those IDs.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .ids("world/2022/jan/01/funeral-of-desmond-tutu-takes-place-in-cape-town")
@@ -546,7 +548,7 @@ impl GuardianContentClient {
     /// Return only content from those production offices.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .production_office("UK")
@@ -565,7 +567,7 @@ impl GuardianContentClient {
     /// Accepts ISO language codes, e.g. en, fr.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .lang("en")
@@ -581,7 +583,7 @@ impl GuardianContentClient {
     /// ranging from 1 to 5.
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .search("Elections")
     ///         .star_rating(5)
@@ -599,7 +601,7 @@ impl GuardianContentClient {
     /// `aletheia::enums::Endpoint::Tag`
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .endpoint(Endpoint::Tag)
     ///         .search("Elections")
@@ -632,7 +634,7 @@ impl GuardianContentClient {
     /// - `Block::BodyPublishedSince(i64)`  (only blocks since given timestamp)
     ///
     /// # Example
-    /// ```
+    /// ```ignore
     /// let response = client
     ///         .endpoint(Endpoint::Tag)
     ///         .search("Elections")
