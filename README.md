@@ -5,11 +5,13 @@
 Aletheia is an HTTP client library for [the Guardian](https://www.theguardian.com)'s [content API](https://open-platform.theguardian.com) written in Rust.
 
 ## How to use it
-Simply add `aletheia` to the list of dependencies in your `Cargo.toml` file
+Aletheia requires Tokio as a dependency to execute asynchronous code.
+Simply add `aletheia` and `tokio` to the list of dependencies in your `Cargo.toml` file.
 
 ```toml
 [dependencies]
 aletheia = "0.1.0"
+tokio = { version = "1", features = ["full"] }
 ```
 
 You need an API key to be able to make requests. 
