@@ -11,7 +11,7 @@
 //! <https://open-platform.theguardian.com/documentation/>
 //!
 //! # Example
-//! ```ignore
+//! ```
 //! use std::error::Error;
 //! use aletheia::GuardianContentClient;
 //! use aletheia::enums::{Field, OrderBy, OrderDate};
@@ -75,7 +75,7 @@ impl GuardianContentClient {
     ///
     /// # Example
     /// ```ignore
-    /// let mut client = aletheia::GuardianContentClient("api-key-here");
+    /// let mut client = aletheia::GuardianContentClient::new("api-key-here");
     /// ```
     pub fn new(api_key: &str) -> GuardianContentClient {
         Self {
