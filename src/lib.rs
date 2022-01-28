@@ -358,6 +358,7 @@ impl GuardianContentClient {
     ///         .send()
     ///         .await?;
     /// ```
+    #[allow(clippy::too_many_arguments)] 
     pub fn datetime_from(
         &mut self,
         year: i32,
@@ -407,6 +408,7 @@ impl GuardianContentClient {
     ///         .send()
     ///         .await?;
     /// ```
+    #[allow(clippy::too_many_arguments)]
     pub fn datetime_to(
         &mut self,
         year: i32,
