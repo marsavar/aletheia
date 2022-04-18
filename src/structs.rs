@@ -42,6 +42,7 @@ pub struct Fields {
     pub trail_text: Option<String>,
     pub headline: Option<String>,
     pub body: Option<String>,
+    pub body_text: Option<String>,
     pub last_modified: Option<chrono::DateTime<Utc>>,
     pub has_story_package: Option<String>,
     pub score: Option<String>,

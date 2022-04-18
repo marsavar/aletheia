@@ -10,7 +10,7 @@ Simply add `aletheia` and `tokio` to the list of dependencies in your `Cargo.tom
 
 ```toml
 [dependencies]
-aletheia = "0.1.2"
+aletheia = "0.1.3"
 tokio = { version = "1", features = ["full"] }
 ```
 
@@ -25,7 +25,7 @@ The code would look something like the example below, and would consist of three
 
 1) Constructing the HTTP client
 2) Building the query
-3) Parsing the response
+3) Parsing the response [*](#debug)
 ```rust
 use aletheia::enums::*;
 use aletheia::GuardianContentClient;
@@ -89,4 +89,10 @@ by Peter Bradshaw (https://www.theguardian.com/p/japa7)
 
 "‘Some of art’s most luxurious orgies’ – Poussin and the Dance review" 
 by Jonathan Jones (https://www.theguardian.com/p/j5kkp)
+```
+
+#### Debug
+[*] You can pretty-print the whole output response with the format specifier `#?`:
+```rust
+println!("{:#?}", response);
 ```

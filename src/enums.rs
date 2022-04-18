@@ -36,6 +36,7 @@ pub enum Field {
     Headline,
     ShowInRelatedContent,
     Body,
+    BodyText,
     LastModified,
     HasStoryPackage,
     Score,

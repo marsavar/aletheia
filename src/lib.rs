@@ -236,7 +236,7 @@ impl GuardianContentClient {
     ///         .order_by(OrderDate::NewspaperEdition)
     ///         .send()
     ///         .await?;
-    /// ```ignore
+    /// ```
     pub fn order_date(&mut self, order_date: enums::OrderDate) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("order-date"), order_date.to_string());
