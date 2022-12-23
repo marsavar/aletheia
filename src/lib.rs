@@ -13,11 +13,11 @@
 //! # Example
 //! ```
 //! use std::error::Error;
-//! use aletheia::GuardianContentClient;
+//! use aletheia::{GuardianContentClient, Result};
 //! use aletheia::enums::{Field, OrderBy, OrderDate};
 //!
 //! #[tokio::main]
-//! async fn main() -> Result<(), Box<dyn Error>> {
+//! async fn main() -> Result<()> {
 //!     let mut client = GuardianContentClient::new("your-api-key");
 //!
 //!     let response = client
@@ -35,19 +35,24 @@
 //! }
 //! ```
 
-#[cfg(test)]
+pub mod enums;
+pub mod error;
+pub mod structs;
 mod tests;
 
-pub mod enums;
-pub mod structs;
-
 use crate::enums::*;
+use crate::error::Error;
 use crate::structs::*;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Client;
 use std::collections::HashMap;
-use std::error::Error;
 use std::string::ToString;
+
+const GUARDIAN_CONTENT_API: &str = "https://content.guardianapis.com";
+
+/// A wrapper around Rust's `core::result::Result<T, E>` which
+/// defaults to `aletheia`'s own `Error` type.
+pub type Result<T> = core::result::Result<T, crate::Error>;
 
 /// The main asynchronous client used to build requests to send to the Guardian's
 /// content API. This client maintains a private internal asynchronous client
@@ -80,7 +85,7 @@ impl GuardianContentClient {
     pub fn new(api_key: &str) -> GuardianContentClient {
         Self {
             http_client: Client::new(),
-            base_url: String::from("https://content.guardianapis.com"),
+            base_url: String::from(GUARDIAN_CONTENT_API),
             api_key: String::from(api_key),
             request: HashMap::new(),
             endpoint: Endpoint::Content,
@@ -126,7 +131,7 @@ impl GuardianContentClient {
     ///         .send()
     ///         .await?;
     /// ```
-    pub fn endpoint(&mut self, endpoint: enums::Endpoint) -> &mut GuardianContentClient {
+    pub fn endpoint(&mut self, endpoint: Endpoint) -> &mut GuardianContentClient {
         self.endpoint = endpoint;
         self
     }
@@ -216,7 +221,7 @@ impl GuardianContentClient {
     ///         .send()
     ///         .await?;
     /// ```
-    pub fn order_by(&mut self, order_by: enums::OrderBy) -> &mut GuardianContentClient {
+    pub fn order_by(&mut self, order_by: OrderBy) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("order-by"), order_by.to_string());
         self
@@ -237,7 +242,7 @@ impl GuardianContentClient {
     ///         .send()
     ///         .await?;
     /// ```
-    pub fn order_date(&mut self, order_date: enums::OrderDate) -> &mut GuardianContentClient {
+    pub fn order_date(&mut self, order_date: OrderDate) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("order-date"), order_date.to_string());
         self
@@ -265,7 +270,7 @@ impl GuardianContentClient {
     ///         .send()
     ///         .await?;
     /// ```
-    pub fn show_fields(&mut self, show_fields: Vec<enums::Field>) -> &mut GuardianContentClient {
+    pub fn show_fields(&mut self, show_fields: Vec<Field>) -> &mut GuardianContentClient {
         let field_sequence = crate::helpers::generate_sequence(show_fields);
         self.request
             .insert(String::from("show-fields"), field_sequence);
@@ -320,7 +325,7 @@ impl GuardianContentClient {
     ///         .send()
     ///         .await?;
     /// ```
-    pub fn query_fields(&mut self, query_fields: Vec<enums::Field>) -> &mut GuardianContentClient {
+    pub fn query_fields(&mut self, query_fields: Vec<Field>) -> &mut GuardianContentClient {
         let field_sequence = crate::helpers::generate_sequence(query_fields);
         self.request
             .insert(String::from("query-fields"), field_sequence);
@@ -427,7 +432,7 @@ impl GuardianContentClient {
     }
 
     /// Change which type of date is used to filter the results using `date_from()`,
-    /// `datetime_from(), `date_to()` and `datetime_to()`.
+    /// `datetime_from()`, `date_to()` and `datetime_to()`.
     ///
     /// The function only accepts one of four `aletheia::enums` of type `UseDate`:
     /// - `UseDate::Published` (default)
@@ -445,7 +450,7 @@ impl GuardianContentClient {
     ///         .send()
     ///         .await?;
     /// ```
-    pub fn use_date(&mut self, use_date: enums::UseDate) -> &mut GuardianContentClient {
+    pub fn use_date(&mut self, use_date: UseDate) -> &mut GuardianContentClient {
         self.request
             .insert(String::from("use-date"), use_date.to_string());
         self
@@ -652,7 +657,7 @@ impl GuardianContentClient {
     /// Terminal operation that sends a GET request to the Guardian API.
     /// Once this function is called, all the query parameters constructed
     /// via the building methods are dropped.
-    pub async fn send(&mut self) -> Result<SearchResponse, Box<dyn Error>> {
+    pub async fn send(&mut self) -> Result<SearchResponse> {
         let endpoint = match self.endpoint {
             Endpoint::Content => String::from("search"),
             Endpoint::Tags => self.endpoint.to_string(),
@@ -686,8 +691,9 @@ impl GuardianContentClient {
 
 mod helpers {
     use crate::enums::Block;
-    use crate::{enums, SearchResponse};
+    use crate::SearchResponse;
     use chrono::{FixedOffset, TimeZone};
+    use std::fmt::Display;
 
     pub(crate) fn std_err(message: &Option<String>, response: &Option<SearchResponse>) {
         if message.is_some() {
@@ -705,7 +711,10 @@ mod helpers {
         }
     }
 
-    pub(crate) fn generate_sequence<T: std::fmt::Display>(items: Vec<T>) -> String {
+    pub(crate) fn generate_sequence<T>(items: Vec<T>) -> String
+    where
+        T: Display,
+    {
         let items_to_strings = items
             .into_iter()
             .map(|item| item.to_string())
@@ -717,7 +726,7 @@ mod helpers {
         }
     }
 
-    pub(crate) fn generate_blocks(items: Vec<enums::Block>) -> String {
+    pub(crate) fn generate_blocks(items: Vec<Block>) -> String {
         let items_to_strings = items
             .into_iter()
             .map(|item| match item {

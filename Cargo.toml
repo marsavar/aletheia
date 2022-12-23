@@ -1,11 +1,11 @@
 [package]
 name = "aletheia"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "A client library for the Guardian's content API"
 license = "MIT"
 documentation = "https://docs.rs/aletheia"
-repository = "https://github.com/MarSavar/aletheia/"
+repository = "https://github.com/marsavar/aletheia/"
 keywords = ["guardian", "api", "client", "library", "http"]
 categories = ["api-bindings", "parsing", "web-programming::http-client"]
 
@@ -18,3 +18,4 @@ serde_with = { version = "1.11.0", features = ["default"] }
 serde_json = { version = "1.0.73", features = ["raw_value"] }
 strum = "0.23"
 strum_macros = "0.23"
+thiserror = "1.0.38"
