@@ -402,7 +402,7 @@ impl GuardianContentClient {
 
     /// Return only content published on or before that date.
     ///
-    /// It is more specific than `datetime_to()` as it accepts
+    /// It is more specific than `date_to()` as it accepts
     /// hours, minutes, seconds as well as a timezone offset.
     ///
     /// # Example
@@ -603,12 +603,12 @@ impl GuardianContentClient {
 
     /// Return only tags of that type.
     /// Only valid if the endpoint is set to
-    /// `aletheia::enums::Endpoint::Tag`
+    /// `aletheia::enums::Endpoint::Tags`
     ///
     /// # Example
     /// ```ignore
     /// let response = client
-    ///         .endpoint(Endpoint::Tag)
+    ///         .endpoint(Endpoint::Tags)
     ///         .search("Elections")
     ///         .tag_type("tv-and-radio/us-television")
     ///         .send()
@@ -641,7 +641,7 @@ impl GuardianContentClient {
     /// # Example
     /// ```ignore
     /// let response = client
-    ///         .endpoint(Endpoint::Tag)
+    ///         .endpoint(Endpoint::Tags)
     ///         .search("Elections")
     ///         .show_blocks(Block::BodyPublishedSince(1556529318000))
     ///         .send()
