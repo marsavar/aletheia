@@ -95,7 +95,7 @@ https://www.theguardian.com/film/2022/sep/02/bones-and-all-review-luca-guadagnin
 ```rust
 println!("{response:#?}");
 ```
-or by using the `dbg!` macro;
+or by using the `dbg!` macro:
 ```rust
 dbg!(response);
 ```
