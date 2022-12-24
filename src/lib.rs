@@ -50,13 +50,13 @@ use std::string::ToString;
 
 const GUARDIAN_CONTENT_API: &str = "https://content.guardianapis.com";
 
-/// A wrapper around Rust's `core::result::Result<T, E>` which
-/// defaults to `aletheia`'s own `Error` type.
+/// A wrapper around Rust's [`core::result::Result<T, E>`] which
+/// defaults to `aletheia`'s own [`Error`] type.
 pub type Result<T> = core::result::Result<T, crate::Error>;
 
 /// The main asynchronous client used to build requests to send to the Guardian's
 /// content API. This client maintains a private internal asynchronous client
-/// implemented by `reqwest::Client`
+/// implemented by [`reqwest::Client`]
 #[derive(Debug)]
 pub struct GuardianContentClient {
     http_client: reqwest::Client,
@@ -103,14 +103,14 @@ impl GuardianContentClient {
     /// Specify the Guardian API endpoint to target.
     ///
     /// Can be one of:
-    /// - `Endpoint::Content` (default): returns all pieces of content in the API.
-    /// - `Endpoint::Tags`: returns all tags in the API. All Guardian content is manually
+    /// - [`Endpoint::Content`] (default): returns all pieces of content in the API.
+    /// - [`Endpoint::Tags`]: returns all tags in the API. All Guardian content is manually
     /// categorised using these tags, of which there are more than 50,000.
-    /// - `Endpoint::Sections`:  returns all sections in the API.
-    /// - `Endpoint::Editions`: returns all editions in the API. Editions are the different
+    /// - [`Endpoint::Sections`]:  returns all sections in the API.
+    /// - [`Endpoint::Editions`]: returns all editions in the API. Editions are the different
     ///   front pages of the Guardian site (currently, there are editions for the United
     /// Kingdom, the United States and Australia).
-    /// - `Endpoint::SingleItem`: returns all the data for a given single item id.
+    /// - [`Endpoint::SingleItem`]: returns all the data for a given single item id.
     ///  Here the term 'item' refers to either a piece of content, a tag, or a section.
     /// The item endpoint matches the paths on theguardian.com.
     ///
@@ -146,12 +146,12 @@ impl GuardianContentClient {
     ///
     /// This field is only valid for the following endpoints:
     ///
-    /// - `Endpoint::Content` (default endpoint, no need to explicitly set it)
-    /// - `Endpoint::Tags`
-    /// - `Endpoint::Sections`
-    /// - `Endpoint::Editions`
+    /// - [`Endpoint::Content`] (default endpoint, no need to explicitly set it)
+    /// - [`Endpoint::Tags`]
+    /// - [`Endpoint::Sections`]
+    /// - [`Endpoint::Editions`]
     ///
-    /// Calling this method on `Endpoint::SingleItem` will
+    /// Calling this method on [`Endpoint::SingleItem`] will
     /// have no effect.
     ///
     /// # Example
@@ -208,10 +208,10 @@ impl GuardianContentClient {
 
     /// Return results in the specified order.
     ///
-    /// The function only accepts one of three `aletheia::enums` enum values:
-    /// - `OrderBy::Newest`
-    /// - `OrderBy::Oldest`
-    /// - `OrderBy::Relevance`
+    /// The function only accepts one of three [`enums::OrderBy`] variants:
+    /// - [`OrderBy::Newest`]
+    /// - [`OrderBy::Oldest`]
+    /// - [`OrderBy::Relevance`]
     ///
     /// # Example
     /// ```ignore
@@ -229,10 +229,10 @@ impl GuardianContentClient {
 
     /// Change which type of date is used to order the results
     ///
-    /// The function only accepts one of three `aletheia::enums` enum values:
-    /// - `OrderDate::Published`
-    /// - `OrderDate::NewspaperEdition`
-    /// - `OrderDate::LastModified`
+    /// The function only accepts one of three [`enums::OrderDate`] variants:
+    /// - [`OrderDate::Published`]
+    /// - [`OrderDate::NewspaperEdition`]
+    /// - [`OrderDate::LastModified`]
     ///
     /// # Example
     /// ```ignore
@@ -250,17 +250,17 @@ impl GuardianContentClient {
 
     /// Add fields associated with the content.
     ///
-    /// The function accepts a vector of `aletheia::enums` values of type `Field`,
+    /// The function accepts a vector of [`enums::Field`] variants,
     /// e.g.
-    /// - `Field::TrailText`
-    /// - `Field::Body`
-    /// - `Field::Byline`
+    /// - [`Field::TrailText`]
+    /// - [`Field::Body`]
+    /// - [`Field::Byline`]
     ///
-    /// If `Field::All` is included in the vector, it will override all other fields.
+    /// If [`Field::All`] is included in the vector, it will override all other fields.
     ///
     /// See <https://open-platform.theguardian.com/documentation/search>
     /// for more information on all the possible fields,
-    /// or check the `aletheia::enums` section of the documentation.
+    /// or check the [`crate::enums`] section of the documentation.
     ///
     /// # Example
     /// ```ignore
@@ -279,17 +279,17 @@ impl GuardianContentClient {
 
     /// Add associated metadata tags.
     ///
-    /// The function accepts a vector of `aletheia::enums` values of type `Tag`,
+    /// The function accepts a vector of [`enums::Tag`] variants,
     /// e.g.
-    /// - `Tag::Blog`
-    /// - `Tag::Contributor`
-    /// - `Tag::Tone`
+    /// - [`Tag::Blog`]
+    /// - [`Tag::Contributor`]
+    /// - [`Tag::Tone`]
     ///
-    /// If `Tag::All` is included in the vector, it will override all other tags.
+    /// If [`Tag::All`] is included in the vector, it will override all other tags.
     ///
     /// See <https://open-platform.theguardian.com/documentation/search>
     /// for more information on all the possible tags,
-    /// or check the `aletheia::enums` section of the documentation.
+    /// or check the [`crate::enums`] section of the documentation.
     ///
     /// # Example
     /// ```ignore
@@ -307,15 +307,15 @@ impl GuardianContentClient {
 
     /// Specify in which indexed fields query terms should be searched on
     ///
-    /// The function accepts a vector of `aletheia::enums` values of type `Field`,
+    /// The function accepts a vector of [`enums::Field`] variants,
     /// e.g.
-    /// - `Field::TrailText`
-    /// - `Field::Body`
-    /// - `Field::Byline`
+    /// - [`Field::TrailText`]
+    /// - [`Field::Body`]
+    /// - [`Field::Byline`]
     ///
     /// See <https://open-platform.theguardian.com/documentation/search>
     /// for more information on all the possible fields,
-    /// or check the `aletheia::enums` section of the documentation.
+    /// or check the [`crate::enums`] section of the documentation.
     ///
     /// # Example
     /// ```ignore
@@ -332,7 +332,7 @@ impl GuardianContentClient {
         self
     }
 
-    /// Return only content published on or after that date.
+    /// Only return content published on or after the specified date.
     ///
     /// # Example
     /// ```ignore
@@ -350,10 +350,13 @@ impl GuardianContentClient {
         self
     }
 
-    /// Return only content published on or after that date.
+    /// Only return content published on or after the specified date.
     ///
     /// It is more specific than `date_from()` as it accepts
     /// hours, minutes, seconds as well as a timezone offset.
+    ///
+    /// Note: Providing invalid YMD-HMS does not append query parameters
+    /// to the API request.
     ///
     /// # Example
     /// ```ignore
@@ -376,12 +379,15 @@ impl GuardianContentClient {
     ) -> &mut GuardianContentClient {
         let formatted_datetime =
             crate::helpers::datetime(year, month, day, hour, min, sec, timezone);
-        self.request
-            .insert(String::from("from-date"), formatted_datetime);
+
+        if !formatted_datetime.is_empty() {
+            self.request
+                .insert(String::from("from-date"), formatted_datetime);
+        }
         self
     }
 
-    /// Return only content published on or before that date.
+    /// Only return content published on or before the specified date.
     ///
     /// # Example
     /// ```ignore
@@ -400,10 +406,13 @@ impl GuardianContentClient {
         self
     }
 
-    /// Return only content published on or before that date.
+    /// Only return content published on or before the specified date.
     ///
-    /// It is more specific than `datetime_to()` as it accepts
+    /// It is more specific than `date_to()` as it accepts
     /// hours, minutes, seconds as well as a timezone offset.
+    ///
+    /// Note: Providing invalid YMD-HMS does not append query parameters
+    /// to the API request.
     ///
     /// # Example
     /// ```ignore
@@ -426,19 +435,23 @@ impl GuardianContentClient {
     ) -> &mut GuardianContentClient {
         let formatted_datetime =
             crate::helpers::datetime(year, month, day, hour, min, sec, timezone);
-        self.request
-            .insert(String::from("to-date"), formatted_datetime);
+
+        if !formatted_datetime.is_empty() {
+            self.request
+                .insert(String::from("to-date"), formatted_datetime);
+        }
+
         self
     }
 
     /// Change which type of date is used to filter the results using `date_from()`,
     /// `datetime_from()`, `date_to()` and `datetime_to()`.
     ///
-    /// The function only accepts one of four `aletheia::enums` of type `UseDate`:
-    /// - `UseDate::Published` (default)
-    /// - `UseDate::FirstPublication`
-    /// - `UseDate::NewspaperEdition`
-    /// - `UseDate::LastModified`
+    /// The function only accepts one of four [`enums::UseDate`] variants:
+    /// - [`UseDate::Published`] (default)
+    /// - [`UseDate::FirstPublication`]
+    /// - [`UseDate::NewspaperEdition`]
+    /// - [`UseDate::LastModified`]
     ///
     /// # Example
     /// ```ignore
@@ -601,14 +614,13 @@ impl GuardianContentClient {
         self
     }
 
-    /// Return only tags of that type.
-    /// Only valid if the endpoint is set to
-    /// `aletheia::enums::Endpoint::Tag`
+    /// Only return tags of the specified type.
+    /// Only valid if the endpoint is set to [`Endpoint::Tags`]
     ///
     /// # Example
     /// ```ignore
     /// let response = client
-    ///         .endpoint(Endpoint::Tag)
+    ///         .endpoint(Endpoint::Tags)
     ///         .search("Elections")
     ///         .tag_type("tv-and-radio/us-television")
     ///         .send()
@@ -623,25 +635,25 @@ impl GuardianContentClient {
 
     /// Add associated blocks (single block for content, one or more for liveblogs).
     ///
-    /// Supports the following `aletheia::enum` types:
+    /// Supports the following [`enums::Block`] variants:
     ///
-    /// - `Block::Main`
-    /// - `Block::Body`
-    /// - `Block::All`
-    /// - `Block::BodyLatest` (limit defaults to 20)
-    /// - `Block::BodyLatestWith(i32)` (override the limits)
-    /// - `Block::BodyOldest`
-    /// - `Block::BodyOldestWith(i32)`
-    /// - `Block::BodyBlockId(&'a str)` (only the block with that ID)
-    /// - `Block::BodyAroundBlockId(&'a str)` (the specified block and 20 blocks either side of it)
-    /// - `Block::BodyAroundBlockIdWith(&'a str, i32)` (the specified block and n blocks either side of it)
-    /// - `Block::BodyKeyEvents`
-    /// - `Block::BodyPublishedSince(i64)`  (only blocks since given timestamp)
+    /// - [`Block::Main`]
+    /// - [`Block::Body`]
+    /// - [`Block::All`]
+    /// - [`Block::BodyLatest`] (limit defaults to 20)
+    /// - [`Block::BodyLatestWith(i32)`] (override the limits)
+    /// - [`Block::BodyOldest`]
+    /// - [`Block::BodyOldestWith(i32)`]
+    /// - [`Block::BodyBlockId(&'a str)`] (only the block with that ID)
+    /// - [`Block::BodyAroundBlockId(&'a str)`] (the specified block and 20 blocks either side of it)
+    /// - [`Block::BodyAroundBlockIdWith(&'a str, i32)`] (the specified block and n blocks either side of it)
+    /// - [`Block::BodyKeyEvents`]
+    /// - [`Block::BodyPublishedSince(i64)`]  (only blocks since given timestamp)
     ///
     /// # Example
     /// ```ignore
     /// let response = client
-    ///         .endpoint(Endpoint::Tag)
+    ///         .endpoint(Endpoint::Tags)
     ///         .search("Elections")
     ///         .show_blocks(Block::BodyPublishedSince(1556529318000))
     ///         .send()
@@ -692,7 +704,7 @@ impl GuardianContentClient {
 mod helpers {
     use crate::enums::Block;
     use crate::SearchResponse;
-    use chrono::{FixedOffset, TimeZone};
+    use chrono::{FixedOffset, LocalResult, TimeZone};
     use std::fmt::Display;
 
     pub(crate) fn std_err(message: &Option<String>, response: &Option<SearchResponse>) {
@@ -763,16 +775,21 @@ mod helpers {
         sec: u32,
         timezone: i32,
     ) -> String {
-        let offset: fn(i32) -> FixedOffset = if timezone >= 0 {
-            FixedOffset::east
+        let offset: fn(i32) -> Option<FixedOffset> = if timezone >= 0 {
+            FixedOffset::east_opt
         } else {
-            FixedOffset::west
+            FixedOffset::west_opt
         };
 
-        offset(timezone.abs() * 3600)
-            .ymd(year, month, day)
-            .and_hms(hour, min, sec)
-            .to_rfc3339()
+        let offset =
+            offset(timezone.abs() * 3600).unwrap_or_else(|| FixedOffset::west_opt(0).unwrap());
+
+        if let LocalResult::Single(date) = offset.with_ymd_and_hms(year, month, day, hour, min, sec)
+        {
+            date.to_rfc3339()
+        } else {
+            String::new()
+        }
     }
 
     pub(crate) fn mock_response() -> SearchResponse {

@@ -10,7 +10,7 @@ Simply add `aletheia` and `tokio` to the list of dependencies in your `Cargo.tom
 
 ```toml
 [dependencies]
-aletheia = "0.1.4"
+aletheia = "0.1.5"
 tokio = { version = "1", features = ["full"] }
 ```
 
@@ -94,4 +94,8 @@ https://www.theguardian.com/film/2022/sep/02/bones-and-all-review-luca-guadagnin
 [*] You can pretty-print the whole output response with the format specifier `#?`:
 ```rust
 println!("{response:#?}");
+```
+or by using the `dbg!` macro:
+```rust
+dbg!(response);
 ```
