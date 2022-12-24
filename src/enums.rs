@@ -1,10 +1,10 @@
 //! Enum types that prevent passing illegal parameters to the
 //! Guardian's content API.
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use strum_macros::Display;
 
-#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderBy {
     Newest,
@@ -12,7 +12,7 @@ pub enum OrderBy {
     Relevance,
 }
 
-#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderDate {
     Published,
@@ -20,7 +20,7 @@ pub enum OrderDate {
     LastModified,
 }
 
-#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum UseDate {
     Published,
@@ -29,7 +29,7 @@ pub enum UseDate {
     LastModified,
 }
 
-#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "camelCase")]
 pub enum Field {
     TrailText,
@@ -55,10 +55,11 @@ pub enum Field {
     LiveBloggingNow,
     CommentCloseDate,
     StarRating,
+    /// Override all fields
     All,
 }
 
-#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum Tag {
     Blog,
@@ -70,14 +71,16 @@ pub enum Tag {
     Series,
     Tone,
     Type,
+    /// Override all tags
     All,
 }
 
-#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum Block<'a> {
     Main,
     Body,
+    /// Override all block types
     All,
     BodyLatest,
     BodyLatestWith(i32),
@@ -90,7 +93,7 @@ pub enum Block<'a> {
     BodyPublishedSince(i64),
 }
 
-#[derive(Display, Debug, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum Endpoint {
     Content,

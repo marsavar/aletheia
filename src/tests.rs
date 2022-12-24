@@ -153,6 +153,25 @@ mod tests {
     }
 
     #[test]
+    fn test_datetime_to_2() {
+        let mut client = setup();
+        // Invalid offset
+        client.datetime_to(2021, 12, 31, 0, 0, 0, 999);
+        assert_eq!(
+            client.request.get("to-date").unwrap(),
+            "2021-12-31T00:00:00+00:00"
+        );
+    }
+
+    #[test]
+    fn test_datetime_to_3() {
+        let mut client = setup();
+        // Invalid YMD
+        client.datetime_to(2021, 13, 40, 0, 0, 0, 5);
+        assert_eq!(client.request.get("to-date").unwrap(), "");
+    }
+
+    #[test]
     fn test_use_date() {
         let mut client = setup();
         client.use_date(UseDate::FirstPublication);

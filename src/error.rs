@@ -1,3 +1,5 @@
+//! Error variants.
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]
