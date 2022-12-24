@@ -422,7 +422,6 @@ impl GuardianContentClient {
     ///         .send()
     ///         .await?;
     /// ```
-    ///
     #[allow(clippy::too_many_arguments)]
     pub fn datetime_to(
         &mut self,
@@ -436,8 +435,12 @@ impl GuardianContentClient {
     ) -> &mut GuardianContentClient {
         let formatted_datetime =
             crate::helpers::datetime(year, month, day, hour, min, sec, timezone);
-        self.request
-            .insert(String::from("to-date"), formatted_datetime);
+
+        if !formatted_datetime.is_empty() {
+            self.request
+                .insert(String::from("to-date"), formatted_datetime);
+        }
+
         self
     }
 
@@ -780,11 +783,13 @@ mod helpers {
 
         let offset =
             offset(timezone.abs() * 3600).unwrap_or_else(|| FixedOffset::west_opt(0).unwrap());
-        let LocalResult::Single(date) = offset.with_ymd_and_hms(year, month, day, hour, min, sec) else {
-             return "".to_owned()
-        };
 
-        date.to_rfc3339()
+        if let LocalResult::Single(date) = offset.with_ymd_and_hms(year, month, day, hour, min, sec)
+        {
+            date.to_rfc3339()
+        } else {
+            String::new()
+        }
     }
 
     pub(crate) fn mock_response() -> SearchResponse {

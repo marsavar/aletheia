@@ -153,7 +153,26 @@ mod tests {
     }
 
     #[test]
-    fn test_datetime_to_2() {
+    fn test_datetime_from_wrong_offset() {
+        let mut client = setup();
+        // Invalid offset
+        client.datetime_from(2021, 12, 31, 0, 0, 0, 1024);
+        assert_eq!(
+            client.request.get("from-date").unwrap(),
+            "2021-12-31T00:00:00+00:00"
+        );
+    }
+
+    #[test]
+    fn test_datetime_from_wrong_ymd_hms() {
+        let mut client = setup();
+        // Invalid YMD
+        client.datetime_from(2021, 13, 40, 0, 999, 0, 5);
+        assert_eq!(client.request.get("from-date"), None);
+    }
+
+    #[test]
+    fn test_datetime_to_wrong_offset() {
         let mut client = setup();
         // Invalid offset
         client.datetime_to(2021, 12, 31, 0, 0, 0, 999);
@@ -164,11 +183,11 @@ mod tests {
     }
 
     #[test]
-    fn test_datetime_to_3() {
+    fn test_datetime_to_wrong_ymd_hms() {
         let mut client = setup();
         // Invalid YMD
-        client.datetime_to(2021, 13, 40, 0, 0, 0, 5);
-        assert_eq!(client.request.get("to-date").unwrap(), "");
+        client.datetime_to(2021, 13, 40, 0, 999, 0, 5);
+        assert_eq!(client.request.get("to-date"), None);
     }
 
     #[test]
