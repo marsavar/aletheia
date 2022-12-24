@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
+## [0.1.4] - 2022-12-23
+
+### Added
+- Added the `Result<T>` type. This is a wrapper around Rust's core `Result<T, E>` type that makes errors default to Aletheia's own `Error` type.
+
 ## [0.1.3] - 2022-04-18
 
 ### Added

@@ -10,7 +10,7 @@ Simply add `aletheia` and `tokio` to the list of dependencies in your `Cargo.tom
 
 ```toml
 [dependencies]
-aletheia = "0.1.3"
+aletheia = "0.1.4"
 tokio = { version = "1", features = ["full"] }
 ```
 
@@ -20,7 +20,7 @@ Keys can be requested [here](https://open-platform.theguardian.com/access/).
 ## Example
 
 Let's say you were interested in finding five film, play or album reviews with a rating of 5 stars 
-containing the word "politics" published from October to December 2021.
+containing the word "politics" published from January to December 2022.
 The code would look something like the example below, and would consist of three steps:
 
 1) Constructing the HTTP client
@@ -28,71 +28,70 @@ The code would look something like the example below, and would consist of three
 3) Parsing the response [*](#debug)
 ```rust
 use aletheia::enums::*;
-use aletheia::GuardianContentClient;
-use std::error::Error;
+use aletheia::{GuardianContentClient, Result};
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    
+async fn main() -> Result<()> {
     // The client is constructed by passing your API key
     // as the only parameter
-    let mut client = GuardianContentClient::new("your_api_key");
-    
+    let mut client = GuardianContentClient::new("your-api-key");
+
     // Query parameters are built incrementally
     let response = client
         .search("politics")
-        .date_from(2021, 10, 1)
-        .date_to(2021, 12, 31)
+        .date_from(2022, 1, 1)
+        .date_to(2022, 12, 31)
         .star_rating(5)
         .page_size(5)
-        .show_fields(vec![Field::Byline, Field::ShortUrl])
+        .show_fields(vec![Field::Byline])
         .order_by(OrderBy::Newest)
         .send()
         .await?;
-    
+
     // Parsing the response.
     // The response objects are deserialized, for the most part,
-    // into Option values that require the use of
-    // `if let` or `match` to handle safely.
+    // into Option values that need to be handled safely with
+    // `let else` or `if let`.
     if let Some(results) = response.results {
-        results.into_iter().for_each(|result| {
-            if let Some(fields) = result.fields {
-                if let (Some(byline), Some(short_url)) = (fields.byline, fields.short_url) {
-                    println!(
-                        "\"{}\" \nby {} ({})\n",
-                        result.web_title.trim(),
-                        byline,
-                        short_url
-                    )
-                }
-            }
-        });
+        for result in results {
+            let Some(pub_date) = result.web_publication_date else { continue };
+            let Some(fields) = result.fields else { continue };
+            let Some(byline) = fields.byline else { continue };
+
+            println!(
+                "[{}] {} ({})\n{}\n",
+                pub_date.format("%Y-%m-%d"),
+                result.web_title.trim(),
+                byline,
+                result.web_url,
+            )
+        }
     }
-    
+
     Ok(())
 }
 ```
 
 The above will return the following results.
 ```
-"Licorice Pizza review – Paul Thomas Anderson’s funniest and most relaxed film yet" 
-by Peter Bradshaw (https://www.theguardian.com/p/jtm7m)
+[2022-12-15] Children of the Taliban review – this beautiful documentary is an absolute must-watch (Rebecca Nicholson)
+https://www.theguardian.com/tv-and-radio/2022/dec/15/children-of-the-taliban-review-this-beautiful-documentary-is-an-absolute-must-watch
 
-"Rina Sawayama review – superstar status cemented by pop’s politician" 
-by Fergal Kinney (https://www.theguardian.com/p/jh9tx)
+[2022-10-25] The White Lotus season two review – this immaculate show’s writing is utterly unrivalled (Lucy Mangan)
+https://www.theguardian.com/tv-and-radio/2022/oct/25/the-white-lotus-season-two-review-this-immaculate-seriess-writing-is-utterly-unrivalled
 
-"Burning review – the searing black summer documentary that Australia deserves" 
-by Luke Buckmaster (https://www.theguardian.com/p/jeqg5)
+[2022-10-09] The Doctor review – a repeat prescription for acute intellectual stimulation (Arifa Akbar)
+https://www.theguardian.com/stage/2022/oct/10/the-doctor-review-duke-of-yorks-theatre-robert-icke-juliet-stevenson
 
-"Harry Potter and the Philosopher’s Stone review – 20 years on, it’s a nostalgic spectacular" 
-by Peter Bradshaw (https://www.theguardian.com/p/japa7)
+[2022-09-27] Make Me Prime Minister review – absolute, exquisite agony (Lucy Mangan)
+https://www.theguardian.com/tv-and-radio/2022/sep/27/make-me-prime-minister-review-absolute-exquisite-agony
 
-"‘Some of art’s most luxurious orgies’ – Poussin and the Dance review" 
-by Jonathan Jones (https://www.theguardian.com/p/j5kkp)
+[2022-09-02] Bones and All review – cannibal romance is a heartbreaking banquet of brilliance (Peter Bradshaw)
+https://www.theguardian.com/film/2022/sep/02/bones-and-all-review-luca-guadagnino-timothee-chalamet-venice-film-festival
 ```
 
 #### Debug
 [*] You can pretty-print the whole output response with the format specifier `#?`:
 ```rust
-println!("{:#?}", response);
+println!("{response:#?}");
 ```
