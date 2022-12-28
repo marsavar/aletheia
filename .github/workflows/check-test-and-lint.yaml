@@ -1,10 +1,8 @@
 on:
   pull_request:
   push:
-    branches:
-      - main
     paths:
-      - 'src/**'
+      - "src/**"
 
 name: Check, Test and Lint
 
