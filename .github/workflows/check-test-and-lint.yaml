@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - "src/**"
+      - ".github/workflows/check-test-and-lint.yaml"
 
 name: Check, Test and Lint
 
