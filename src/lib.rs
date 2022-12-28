@@ -57,7 +57,7 @@ pub type Result<T> = core::result::Result<T, crate::Error>;
 /// The main asynchronous client used to build requests to send to the Guardian's
 /// content API. This client maintains a private internal asynchronous client
 /// implemented by [`reqwest::Client`]
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct GuardianContentClient {
     http_client: reqwest::Client,
     api_key: String,

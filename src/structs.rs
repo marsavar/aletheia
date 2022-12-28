@@ -8,13 +8,13 @@ use chrono::Utc;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Response {
     pub message: Option<String>,
     pub response: Option<SearchResponse>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SearchResponse {
     pub status: Option<String>,
@@ -30,7 +30,7 @@ pub struct SearchResponse {
     pub content: Option<Content>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Fields {
     pub byline: Option<String>,
@@ -58,7 +58,7 @@ pub struct Fields {
     pub star_rating: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Tag {
     pub id: String,
@@ -87,7 +87,7 @@ pub struct Tag {
     pub internal_name: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SearchResult {
     pub id: String,
@@ -108,13 +108,13 @@ pub struct SearchResult {
     pub editions: Option<Vec<Edition>>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Reference {
     pub id: String,
     pub r#type: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Section {
     pub id: String,
@@ -124,7 +124,7 @@ pub struct Section {
     pub editions: Vec<Edition>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Edition {
     pub id: String,
@@ -134,7 +134,7 @@ pub struct Edition {
     pub code: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Blocks {
     pub main: Option<Block>,
@@ -143,7 +143,7 @@ pub struct Blocks {
     pub requested_body_blocks: Option<BTreeMap<String, Vec<Block>>>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Block {
     pub id: String,
@@ -160,7 +160,7 @@ pub struct Block {
     pub elements: Vec<BlockElement>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BlockElement {
     pub r#type: String,
@@ -187,14 +187,14 @@ pub struct BlockElement {
     pub code_type_data: Option<CodeElementFields>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TextElementFields {
     pub html: Option<String>,
     pub role: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct VideoElementFields {
     pub url: Option<String>,
@@ -219,7 +219,7 @@ pub struct VideoElementFields {
     pub source_domain: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TweetElementFields {
     pub source: Option<String>,
@@ -231,7 +231,7 @@ pub struct TweetElementFields {
     pub source_domain: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ImageElementFields {
     pub caption: Option<String>,
@@ -250,7 +250,7 @@ pub struct ImageElementFields {
     pub role: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AudioElementFields {
     pub html: Option<String>,
@@ -267,7 +267,7 @@ pub struct AudioElementFields {
     pub source_domain: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PullquoteElementFields {
     pub html: Option<String>,
@@ -277,7 +277,7 @@ pub struct PullquoteElementFields {
     pub source_domain: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InteractiveElementFields {
     pub url: Option<String>,
@@ -294,7 +294,7 @@ pub struct InteractiveElementFields {
     pub source_domain: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StandardElementFields {
     pub url: Option<String>,
@@ -312,7 +312,7 @@ pub struct StandardElementFields {
     pub source_domain: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WitnessElementFields {
     pub url: Option<String>,
@@ -344,7 +344,7 @@ pub struct WitnessElementFields {
     pub source_domain: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RichLinkElementFields {
     pub url: Option<String>,
@@ -355,7 +355,7 @@ pub struct RichLinkElementFields {
     pub sponsorship: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MembershipElementFields {
     pub original_url: Option<String>,
@@ -372,7 +372,7 @@ pub struct MembershipElementFields {
     pub role: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EmbedElementFields {
     pub html: Option<String>,
@@ -385,7 +385,7 @@ pub struct EmbedElementFields {
     pub caption: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InstagramElementFields {
     pub original_url: String,
@@ -401,7 +401,7 @@ pub struct InstagramElementFields {
     pub source_domain: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommentElementFields {
     pub source: Option<String>,
@@ -417,7 +417,7 @@ pub struct CommentElementFields {
     pub role: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct VineElementFields {
     pub original_url: String,
@@ -434,7 +434,7 @@ pub struct VineElementFields {
     pub source_domain: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ContentAtomElementFields {
     pub atom_id: String,
@@ -442,20 +442,20 @@ pub struct ContentAtomElementFields {
     pub role: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EmbedTracking {
     pub tracks: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CodeElementFields {
     pub html: String,
     pub language: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Asset {
     pub r#type: String,
@@ -464,7 +464,7 @@ pub struct Asset {
     pub type_data: Option<AssetFields>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AssetFields {
     pub aspect_ratio: Option<String>,
@@ -537,14 +537,14 @@ pub struct AssetFields {
     pub safe_embed_code: Option<bool>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CapiDateTime {
     pub date_time: i64,
     pub iso8601: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(dead_code)]
 pub struct BlockAttributes {
@@ -555,13 +555,13 @@ pub struct BlockAttributes {
     membership_placeholder: Option<MembershipPlaceholder>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MembershipPlaceholder {
     pub campaign_code: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(dead_code)]
 pub struct User {
@@ -570,7 +570,7 @@ pub struct User {
     last_name: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Content {
     pub id: String,
@@ -595,7 +595,7 @@ pub struct Content {
     pub pillar_name: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ContentFields {
     pub headline: Option<String>,
