@@ -4,7 +4,7 @@
 use serde::Deserialize;
 use strum_macros::Display;
 
-#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderBy {
     Newest,
@@ -12,7 +12,7 @@ pub enum OrderBy {
     Relevance,
 }
 
-#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum OrderDate {
     Published,
@@ -20,7 +20,7 @@ pub enum OrderDate {
     LastModified,
 }
 
-#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum UseDate {
     Published,
@@ -29,7 +29,7 @@ pub enum UseDate {
     LastModified,
 }
 
-#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "camelCase")]
 pub enum Field {
     TrailText,
@@ -59,7 +59,7 @@ pub enum Field {
     All,
 }
 
-#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum Tag {
     Blog,
@@ -75,7 +75,7 @@ pub enum Tag {
     All,
 }
 
-#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum Block<'a> {
     Main,
@@ -93,7 +93,7 @@ pub enum Block<'a> {
     BodyPublishedSince(i64),
 }
 
-#[derive(Display, Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Display, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum Endpoint {
     Content,

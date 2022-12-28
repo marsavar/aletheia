@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
+## [0.1.6] - 2022-12-28
+
+### Added
+- Structs and enums now implement the `Clone` trait.
+
 ## [0.1.5] - 2022-12-24
 
 ### Fixed

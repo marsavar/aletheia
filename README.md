@@ -10,7 +10,7 @@ Simply add `aletheia` and `tokio` to the list of dependencies in your `Cargo.tom
 
 ```toml
 [dependencies]
-aletheia = "0.1.5"
+aletheia = "0.1.6"
 tokio = { version = "1", features = ["full"] }
 ```
 
