@@ -93,12 +93,39 @@ pub enum Block<'a> {
     BodyPublishedSince(i64),
 }
 
-#[derive(Clone, Display, Debug, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Display, Default, Debug, Deserialize, Eq, PartialEq)]
 #[strum(serialize_all = "kebab-case")]
 pub enum Endpoint {
+    #[default]
     Content,
     Tags,
     Sections,
     Editions,
     SingleItem,
 }
+
+/// Whether a trait matches the `All` variant
+pub(crate) trait IsAll {
+    fn is_all(&self) -> bool;
+}
+
+macro_rules! impl_is_all {
+    ($enum_type:ident) => {
+        impl IsAll for $enum_type {
+            fn is_all(&self) -> bool {
+                matches!(self, $enum_type::All)
+            }
+        }
+    };
+    ($enum_type:ident <$lifetime:lifetime>) => {
+        impl<$lifetime> IsAll for $enum_type<$lifetime> {
+            fn is_all(&self) -> bool {
+                matches!(self, $enum_type::All)
+            }
+        }
+    };
+}
+
+impl_is_all!(Block<'a>);
+impl_is_all!(Field);
+impl_is_all!(Tag);

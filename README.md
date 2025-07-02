@@ -4,40 +4,51 @@
 
 Aletheia is an HTTP client library for [the Guardian](https://www.theguardian.com)'s [content API](https://open-platform.theguardian.com) written in Rust.
 
+[![Crates.io][crates-badge]][crates-url]
+[![Build Status][actions-badge]][actions-url]
+
+[crates-badge]: https://img.shields.io/crates/v/aletheia.svg
+[crates-url]: https://crates.io/crates/aletheia
+[actions-badge]: https://github.com/marsavar/aletheia/workflows/CI/badge.svg
+[actions-url]: https://github.com/marsavar/aletheia/actions?query=workflow%3ACI+branch%3Amain
+
 ## How to use it
 Aletheia requires Tokio as a dependency to execute asynchronous code.\
 Simply add `aletheia` and `tokio` to the list of dependencies in your `Cargo.toml` file.
 
 ```toml
 [dependencies]
-aletheia = "0.1.6"
+aletheia = "1.0.0"
 tokio = { version = "1", features = ["full"] }
 ```
 
-You also need an API key to be able to make requests. 
-Keys can be requested [here](https://open-platform.theguardian.com/access/). 
+You also need an API key to be able to make requests.
+Keys can be requested [here](https://open-platform.theguardian.com/access/).
 
 ## Example
 
-Let's say you were interested in finding five film, play or album reviews with a rating of 5 stars 
+Let's say you were interested in finding five film, play or album reviews with a rating of 5 stars
 containing the word "politics" published from January to December 2022.
 The code would look something like the example below, and would consist of three steps:
 
 1) Constructing the HTTP client
 2) Building the query
 3) Parsing the response [*](#debug)
+
 ```rust
 use aletheia::enums::*;
-use aletheia::{GuardianContentClient, Result};
+use aletheia::error::Error;
+use aletheia::GuardianContentClient;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Error> {
     // The client is constructed by passing your API key
     // as the only parameter
-    let mut client = GuardianContentClient::new("your-api-key");
+    let client = GuardianContentClient::new("YOUR_API_KEY");
 
     // Query parameters are built incrementally
     let response = client
+        .build_request()
         .search("politics")
         .date_from(2022, 1, 1)
         .date_to(2022, 12, 31)
