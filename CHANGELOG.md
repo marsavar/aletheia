@@ -3,6 +3,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
+## [1.0.0] - 2025-07-02
+
+### Changed
+- [**BREAKING CHANGE**] `GuardianContentClient` no longer needs to be mutable. To account for this change, requests must be built with the `.build_request()` method to be called on the client. An example can be found in the `README.md` file.
+The motivation for this change is to be able to share the client between multiple threads without resorting to synchronisation primitives.
+- The client no longer prints to stderr if the Guardian Content API responds with an error. The client now returns an `Error` variant depending on the type of error, so that downstream consumers can deal with the errors as they wish.
+- Removed the `aletheia::Result<T>` type.
+- Upgraded several dependencies.
+
+### Added
+- Added MSRV to the project
+
+### Fixed
+- The `pages` field in the `SearchResponse` struct is now of type `Option<isize>` (previously `Option<u32>`) to account for the API responding with `-1` when setting the page size to `0` on the client.
+
 ## [0.1.6] - 2022-12-28
 
 ### Added

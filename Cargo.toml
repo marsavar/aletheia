@@ -1,6 +1,6 @@
 [package]
 name = "aletheia"
-version = "0.1.6"
+version = "1.0.0"
 edition = "2021"
 description = "A client library for the Guardian's content API"
 license = "MIT"
@@ -10,11 +10,11 @@ keywords = ["guardian", "api", "client", "library", "http"]
 categories = ["api-bindings", "parsing", "web-programming::http-client"]
 
 [dependencies]
-chrono = { version = "0.4", features = ["serde"] }
+chrono = { version = "0.4.41", features = ["serde"] }
 tokio = { version = "1", features = ["full"] }
-reqwest = { version = "0.11", features = ["json"] }
-serde = { version = "1.0.151", features = ["derive"] }
-serde_json = { version = "1.0.91", features = ["raw_value"] }
-strum = "0.24.1"
-strum_macros = "0.24.3"
-thiserror = "1.0.38"
+reqwest = { version = "0.12.22", features = ["json"] }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = { version = "1.0.140", features = ["raw_value"] }
+strum = "0.27.1"
+strum_macros = "0.27.1"
+thiserror = "2.0.12"
