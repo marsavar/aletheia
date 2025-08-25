@@ -35,6 +35,7 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
       - run: cargo test
+      - run: cargo test --features blocking
 
   fmt:
     name: Rustfmt ${{ matrix.os }}, ${{ matrix.rust }}

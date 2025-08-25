@@ -2,38 +2,70 @@
 //!
 //! It is built on top of `reqwest` and provides a similar interface
 //! for building queries. Responses returned by the client are deserialized
-//! into structs, mirroring the types used by the API.
+//! into structs that mirror the types used by the API.
 //!
-//! Keys to start querying the API can be obtained here:
+//! Aletheia provides both an asynchronous client (default) and a blocking
+//! client, which can be enabled with the `blocking` feature.
+//!
+//! Keys to query the API can be obtained at
 //! <https://open-platform.theguardian.com/access/>
 //!
-//! More information on the API can be found here:
+//! More information on the API can be found at
 //! <https://open-platform.theguardian.com/documentation/>
 //!
-//! # Example
-//! ```ignore
-//! use aletheia::error::Error;
-//! use aletheia::GuardianContentClient;
-//! use aletheia::enums::{Field, OrderBy, OrderDate};
+//! # Async example
+//! Executing the code below requires an asynchronous context.
+//! For example, it can be executed from within an `async fn` block.
+//! ```rust
+//! # use aletheia::GuardianContentClient;
+//! # use aletheia::enums::{Field, OrderBy, OrderDate};
+//! # use std::error::Error;
+//! # #[cfg(not(feature = "blocking"))]
+//! # async fn run() -> Result<(), Box<dyn Error>> {
+//! let client = GuardianContentClient::new("YOUR_API_KEY");
 //!
-//! #[tokio::main]
-//! async fn main() -> Result<(), Error> {
-//!     let client = GuardianContentClient::new("YOUR_API_KEY");
+//! let response = client
+//!     .build_request()
+//!     .search("Elections")
+//!     .page_size(10)
+//!     .show_fields(vec![Field::Byline, Field::LastModified])
+//!     .order_by(OrderBy::Newest)
+//!     .order_date(OrderDate::Published)
+//!     .send()
+//!     .await?;
 //!
-//!     let response = client
-//!         .build_request()
-//!         .search("Elections")
-//!         .page_size(10)
-//!         .show_fields(vec![Field::Byline, Field::LastModified])
-//!         .order_by(OrderBy::Newest)
-//!         .order_date(OrderDate::Published)
-//!         .send()
-//!         .await?;
+//! println!("{:#?}", response.results);
+//! # Ok(())
+//! # }
+//! ```
+//! # Blocking example
+//! Executing the code below requires a blocking context and the `blocking`
+//! feature enabled.
+//! ### Warning
+//! Using the blocking client in an async context will cause a panic.
+//! If you need to use the blocking client in an `async` function,
+//! you can do so in a blocking context, for example by using [`tokio::task::spawn_blocking`].
+//! ```rust
+//! # use aletheia::GuardianContentClient;
+//! # use aletheia::enums::{Field, OrderBy, OrderDate};
+//! # use std::error::Error;
+//! # #[cfg(feature = "blocking")]
+//! # fn run() -> Result<(), Box<dyn Error>> {
+//! let client = GuardianContentClient::new("YOUR_API_KEY");
 //!
-//!     let results = response.results;
+//! let response = client
+//!     .build_request()
+//!     .search("Elections")
+//!     .page_size(10)
+//!     .show_fields(vec![Field::Byline, Field::LastModified])
+//!     .order_by(OrderBy::Newest)
+//!     .order_date(OrderDate::Published)
+//!     .send()?;
 //!
-//!     Ok(())
-//! }
+//! println!("{:#?}", response.results);
+//!
+//!     # Ok(())
+//! # }
 //! ```
 
 pub mod enums;
@@ -45,25 +77,46 @@ use crate::enums::*;
 use crate::error::Error;
 use crate::structs::*;
 use reqwest::header::{HeaderMap, HeaderValue};
-use reqwest::{Client, Url};
+use reqwest::Url;
 use std::collections::HashMap;
 use std::string::ToString;
 
 const GUARDIAN_CONTENT_API_URL: &str = "https://content.guardianapis.com";
 
-/// The main asynchronous client used to build requests to send to the Guardian's
-/// content API. This client maintains a private internal asynchronous client
-/// implemented by [`reqwest::Client`]
+#[cfg(not(feature = "blocking"))]
+type ReqwestClient = reqwest::Client;
+
+#[cfg(feature = "blocking")]
+type ReqwestClient = reqwest::blocking::Client;
+
 #[derive(Clone, Debug)]
+#[cfg_attr(
+    not(feature = "blocking"),
+    doc = "The client used to send requests to the Guardian's content API.
+    This client maintains a private internal asynchronous client implemented by [`reqwest::Client`].
+    Note that use of this client requires an asychronous context. If your application does not run
+    asynchronously (for example if the `tokio` runtime is not available), consider enabling the `blocking`
+    feature of this crate, which will transform this into a blocking client."
+)]
+#[cfg_attr(
+    feature = "blocking",
+    doc = "The client used to send requests to the Guardian's content API.
+    This client maintains a private internal blocking client implemented by [`reqwest::blocking::Client`].
+    Note that use of this client requires a blocking context. If your application relies on an async runtime
+    such as `tokio`, consider using the asynchronous version of this client by removing the `blocking` feature
+    of this crate.
+    Alternatively, you can still use this client in an async runtime, but panics will occur
+    if it is not invoked in a blocking context (e.g. by using [`tokio::task::spawn_blocking`])"
+)]
 pub struct GuardianContentClient {
-    http_client: reqwest::Client,
+    http_client: ReqwestClient,
     api_key: String,
     base_url: Url,
 }
 
 #[derive(Debug, Clone)]
 pub struct GuardianRequestBuilder {
-    http_client: Client,
+    http_client: ReqwestClient,
     base_url: Url,
     api_key: String,
     request: HashMap<String, String>,
@@ -85,7 +138,7 @@ impl GuardianRequestBuilder {
     ///   Here the term 'item' refers to either a piece of content, a tag, or a section.
     ///   The item endpoint matches the paths on theguardian.com.
     ///
-    /// # Example 1
+    /// # Async example 1
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -95,7 +148,7 @@ impl GuardianRequestBuilder {
     ///         .await?;
     /// ```
     ///
-    /// # Example 2
+    /// # Async example 2
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -127,7 +180,7 @@ impl GuardianRequestBuilder {
     /// Calling this method on [`Endpoint::SingleItem`] will
     /// have no effect.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -146,7 +199,7 @@ impl GuardianRequestBuilder {
     /// In order to page through the results, you can pass the page number
     /// as a parameter to this function.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -167,7 +220,7 @@ impl GuardianRequestBuilder {
     /// This function overrides the default.
     /// The page value must be between 0 and 200 for a successful response.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -189,7 +242,7 @@ impl GuardianRequestBuilder {
     /// - [`OrderBy::Oldest`]
     /// - [`OrderBy::Relevance`]
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -211,7 +264,7 @@ impl GuardianRequestBuilder {
     /// - [`OrderDate::NewspaperEdition`]
     /// - [`OrderDate::LastModified`]
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -240,7 +293,7 @@ impl GuardianRequestBuilder {
     /// for more information on all the possible fields,
     /// or check the [`crate::enums`] section of the documentation.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -270,7 +323,7 @@ impl GuardianRequestBuilder {
     /// for more information on all the possible tags,
     /// or check the [`crate::enums`] section of the documentation.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -297,7 +350,7 @@ impl GuardianRequestBuilder {
     /// for more information on all the possible fields,
     /// or check the [`crate::enums`] section of the documentation.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -315,7 +368,7 @@ impl GuardianRequestBuilder {
 
     /// Only return content published on or after the specified date.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -338,7 +391,7 @@ impl GuardianRequestBuilder {
     /// Note: Providing invalid YMD-HMS does not append query parameters
     /// to the API request.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -370,7 +423,7 @@ impl GuardianRequestBuilder {
 
     /// Only return content published on or before the specified date.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -394,7 +447,7 @@ impl GuardianRequestBuilder {
     /// Note: Providing invalid YMD-HMS does not append query parameters
     /// to the API request.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -434,7 +487,7 @@ impl GuardianRequestBuilder {
     /// - [`UseDate::NewspaperEdition`]
     /// - [`UseDate::LastModified`]
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -453,7 +506,7 @@ impl GuardianRequestBuilder {
 
     /// Add associated metadata section.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -470,7 +523,7 @@ impl GuardianRequestBuilder {
 
     /// Return only content in those sections.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -487,7 +540,7 @@ impl GuardianRequestBuilder {
 
     /// Return only content with those references.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -504,7 +557,7 @@ impl GuardianRequestBuilder {
 
     /// Return only content with references of those types.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -521,7 +574,7 @@ impl GuardianRequestBuilder {
 
     /// Return only content with those tags.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -537,7 +590,7 @@ impl GuardianRequestBuilder {
 
     /// Return only content with those IDs.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -553,7 +606,7 @@ impl GuardianRequestBuilder {
 
     /// Return only content from those production offices.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -573,7 +626,7 @@ impl GuardianRequestBuilder {
     /// Return only content in those languages.
     /// Accepts ISO language codes, e.g. en, fr.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -590,7 +643,7 @@ impl GuardianRequestBuilder {
     /// Return only content with a given star rating
     /// ranging from 1 to 5.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -608,7 +661,7 @@ impl GuardianRequestBuilder {
     /// Only return tags of the specified type.
     /// Only valid if the endpoint is set to [`Endpoint::Tags`]
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -642,7 +695,7 @@ impl GuardianRequestBuilder {
     /// - [`Block::BodyKeyEvents`]
     /// - [`Block::BodyPublishedSince(i64)`]  (only blocks since given timestamp)
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let response = client
     ///         .build_request()
@@ -662,6 +715,7 @@ impl GuardianRequestBuilder {
     /// Terminal operation that sends a GET request to the Guardian API.
     /// Once this function is called, all the query parameters constructed
     /// via the building methods are dropped.
+    #[cfg(not(feature = "blocking"))]
     pub async fn send(&mut self) -> Result<SearchResponse, Error> {
         let mut headers = HeaderMap::new();
         if !self.api_key.is_empty() {
@@ -714,16 +768,69 @@ impl GuardianRequestBuilder {
             None => Ok(crate::helpers::mock_response()),
         }
     }
+
+    /// Terminal operation that sends a GET request to the Guardian API.
+    /// Once this function is called, all the query parameters constructed
+    /// via the building methods are dropped.
+    #[cfg(feature = "blocking")]
+    pub fn send(&mut self) -> Result<SearchResponse, Error> {
+        let mut headers = HeaderMap::new();
+        if !self.api_key.is_empty() {
+            headers.insert("api-key", HeaderValue::from_str(&self.api_key).unwrap());
+        }
+
+        let endpoint = match self.endpoint {
+            Endpoint::Content => String::from("search"),
+            Endpoint::Tags => self.endpoint.to_string(),
+            Endpoint::Sections => self.endpoint.to_string(),
+            Endpoint::Editions => self.endpoint.to_string(),
+            Endpoint::SingleItem => self
+                .request
+                .get("q")
+                .ok_or(Error::MissingQueryParameter("q"))?
+                .to_owned(),
+        };
+
+        let queries = Vec::from_iter(self.request.iter());
+
+        let mut url = self.base_url.clone();
+        url.path_segments_mut().unwrap().push(&endpoint);
+
+        let search = self
+            .http_client
+            .get(url)
+            .headers(headers)
+            .query(&queries)
+            .send()?
+            .json::<Response>()?;
+
+        if let Some(err) = search.message {
+            return Err(Error::ApiError(err));
+        }
+
+        if let Some(response_content) = &search.response {
+            if response_content.status.as_deref() == Some("error") {
+                if let Some(message) = &response_content.message {
+                    return Err(Error::ApiError(message.to_owned()));
+                }
+            }
+        }
+
+        self.request.clear();
+
+        match search.response {
+            Some(r) => Ok(r),
+            None => Ok(crate::helpers::mock_response()),
+        }
+    }
 }
 
 impl GuardianContentClient {
     /// Constructor for the client.
     /// The constructor takes an API key which is then stored internally
-    /// in the struct. The client then uses the builder pattern
-    /// to add query parameters to the request. The query-building
-    /// methods as well as the terminal operation take a mutable borrow
-    /// of self. This allows the client not to be consumed after a request.
-    /// As a result, the client should be initialised with the `mut` keyword.
+    /// in the struct. You can then build requests by using the
+    /// `build_request()` method on the client and then gradually
+    /// adding query parameters.
     ///
     /// API keys for the Guardian's content API can be requested at
     /// <https://open-platform.theguardian.com/access/>
@@ -734,7 +841,7 @@ impl GuardianContentClient {
     /// ```
     pub fn new(api_key: &str) -> GuardianContentClient {
         Self {
-            http_client: Client::new(),
+            http_client: ReqwestClient::new(),
             // Safety: it's ok to unwrap here since we are passing a valid URL string
             base_url: Url::parse(GUARDIAN_CONTENT_API_URL).unwrap(),
             api_key: String::from(api_key),
@@ -742,10 +849,10 @@ impl GuardianContentClient {
     }
 
     /// Start building a new request.
-    /// This method returns `GuardianRequestBuilder`, which allows you to
+    /// This method returns [`GuardianRequestBuilder`], which allows you to
     /// build queries using the builder pattern.
     ///
-    /// # Example
+    /// # Async example
     /// ```ignore
     /// let client = aletheia::GuardianContentClient::new("YOUR_API_KEY");
     /// let response = client
@@ -754,6 +861,17 @@ impl GuardianContentClient {
     ///         .datetime_from(2020, 1, 1, 12, 0, 0, 2)
     ///         .send()
     ///         .await?;
+    /// ```
+    /// # Blocking example
+    /// This requires the `blocking` feature to be enabled, which
+    /// replaces the async client with a blocking one.
+    /// ```ignore
+    /// let client = aletheia::GuardianContentClient::new("YOUR_API_KEY");
+    /// let response = client
+    ///         .build_request()
+    ///         .search("Elections")
+    ///         .datetime_from(2020, 1, 1, 12, 0, 0, 2)
+    ///         .send()?;
     /// ```
     pub fn build_request(&self) -> GuardianRequestBuilder {
         GuardianRequestBuilder {

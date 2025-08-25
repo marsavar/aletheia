@@ -1,6 +1,6 @@
 [package]
 name = "aletheia"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 description = "A client library for the Guardian's content API"
 license = "MIT"
@@ -8,6 +8,11 @@ documentation = "https://docs.rs/aletheia"
 repository = "https://github.com/marsavar/aletheia/"
 keywords = ["guardian", "api", "client", "library", "http"]
 categories = ["api-bindings", "parsing", "web-programming::http-client"]
+
+[features]
+default = []
+# Replaces the asynchronous client with a blocking one
+blocking = ["reqwest/blocking"]
 
 [dependencies]
 chrono = { version = "0.4.41", features = ["serde"] }

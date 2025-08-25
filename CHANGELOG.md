@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
+## [1.1.0] - 2025-08-25
+
+### Added
+- Added the `blocking` feature, which replaces the inner HTTP asynchronous client with a blocking one. This is useful when running a minimal setup that doesn't require a full async runtime.
+
+### Fixed
+- Updated stale documentation.
+
 ## [1.0.0] - 2025-07-02
 
 ### Changed
