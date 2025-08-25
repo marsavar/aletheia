@@ -133,8 +133,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .page_size(5)
         .show_fields(vec![Field::Byline])
         .order_by(OrderBy::Newest)
-        .send()
-        .await?;
+        .send();
 
     if let Some(results) = response.results {
         for result in results {
