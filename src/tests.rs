@@ -1,5 +1,5 @@
-#[cfg(test)]
-mod tests {
+#[cfg(all(test, not(feature = "blocking")))]
+mod async_client {
     use reqwest::Url;
 
     use crate::{
@@ -333,6 +333,35 @@ mod tests {
             .endpoint(Endpoint::SingleItem)
             .send()
             .await;
+
+        assert!(result.is_err());
+
+        let err = result.err().unwrap();
+        assert!(matches!(err, Error::MissingQueryParameter("q")));
+    }
+}
+
+#[cfg(all(test, feature = "blocking"))]
+mod blocking_client {
+
+    use crate::{enums::Endpoint, error::Error, GuardianContentClient};
+
+    fn client_setup() -> GuardianContentClient {
+        GuardianContentClient::new("test-api-key")
+    }
+
+    #[test]
+    fn test_api_key() {
+        let client = client_setup();
+        assert_eq!(client.api_key, "test-api-key");
+    }
+
+    #[test]
+    fn test_error_missing_parameter() {
+        let result = client_setup()
+            .build_request()
+            .endpoint(Endpoint::SingleItem)
+            .send();
 
         assert!(result.is_err());
 

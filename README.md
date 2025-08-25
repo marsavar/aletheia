@@ -13,19 +13,21 @@ Aletheia is an HTTP client library for [the Guardian](https://www.theguardian.co
 [actions-url]: https://github.com/marsavar/aletheia/actions?query=workflow%3ACI+branch%3Amain
 
 ## How to use it
+You need an API key to be able to make requests.
+Keys can be requested [here](https://open-platform.theguardian.com/access/).
+
+Aletheia provides two versions of the client: [asynchronous](#async-example) (default behaviour) and [blocking](#blocking-example).\
+The default behaviour is asynchronous, which means the client can be used inside `async fn`.
+
+### Async example
 Aletheia requires Tokio as a dependency to execute asynchronous code.\
 Simply add `aletheia` and `tokio` to the list of dependencies in your `Cargo.toml` file.
 
 ```toml
 [dependencies]
-aletheia = "1.0.0"
+aletheia = "1.1.0"
 tokio = { version = "1", features = ["full"] }
 ```
-
-You also need an API key to be able to make requests.
-Keys can be requested [here](https://open-platform.theguardian.com/access/).
-
-## Example
 
 Let's say you were interested in finding five film, play or album reviews with a rating of 5 stars
 containing the word "politics" published from January to December 2022.
@@ -37,11 +39,11 @@ The code would look something like the example below, and would consist of three
 
 ```rust
 use aletheia::enums::*;
-use aletheia::error::Error;
 use aletheia::GuardianContentClient;
+use std::error::Error;
 
 #[tokio::main]
-async fn main() -> Result<(), Error> {
+async fn main() -> Result<(), Box<dyn Error>> {
     // The client is constructed by passing your API key
     // as the only parameter
     let client = GuardianContentClient::new("YOUR_API_KEY");
@@ -99,6 +101,58 @@ https://www.theguardian.com/tv-and-radio/2022/sep/27/make-me-prime-minister-revi
 
 [2022-09-02] Bones and All review – cannibal romance is a heartbreaking banquet of brilliance (Peter Bradshaw)
 https://www.theguardian.com/film/2022/sep/02/bones-and-all-review-luca-guadagnino-timothee-chalamet-venice-film-festival
+```
+
+### Blocking example
+Add `aletheia` to the list of dependencies in your `Cargo.toml` file with the `blocking` feature enabled.
+```toml
+[dependencies]
+aletheia = { version = "1.1.0", features = ["blocking"] }
+```
+This makes `GuardianContentClient` blocking, which can be useful in situations where a full async runtime is not
+needed. Note that invoking the blocking client from an `async` block causes a panic.
+It can still be used in `async fn`, however, if invoked from a blocking context, for example inside
+`tokio::task::spawn_blocking`.
+
+The above example then becomes:
+
+```rust
+use aletheia::enums::*;
+use aletheia::GuardianContentClient;
+use std::error::Error;
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let client = GuardianContentClient::new("YOUR_API_KEY");
+
+    let response = client
+        .build_request()
+        .search("politics")
+        .date_from(2022, 1, 1)
+        .date_to(2022, 12, 31)
+        .star_rating(5)
+        .page_size(5)
+        .show_fields(vec![Field::Byline])
+        .order_by(OrderBy::Newest)
+        .send();
+
+    if let Some(results) = response.results {
+        for result in results {
+            let Some(pub_date) = result.web_publication_date else { continue };
+            let Some(fields) = result.fields else { continue };
+            let Some(byline) = fields.byline else { continue };
+
+            println!(
+                "[{}] {} ({})\n{}\n",
+                pub_date.format("%Y-%m-%d"),
+                result.web_title.trim(),
+                byline,
+                result.web_url,
+            )
+        }
+    }
+
+    Ok(())
+}
 ```
 
 #### Debug
